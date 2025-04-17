@@ -19,7 +19,10 @@ class Database:
             configuration if configuration is not None else Configuration()
         )
         self._engine = create_async_engine(self._configuration.database.url)
-        self._session_maker = async_sessionmaker(self._engine, expire_on_commit=False)
+        self._session_maker = async_sessionmaker(
+            self._engine,
+            expire_on_commit=False,
+        )
 
     # TODO this ready function should compare the models against the live database
     # async def ready(self) -> bool:

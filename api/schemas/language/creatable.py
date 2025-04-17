@@ -1,7 +1,12 @@
 from __future__ import annotations
-import msgspec
 from typing import *
+import msgspec
+from sqlalchemy.orm import Mapped
 from ..base import Base
+
+
+class CreateProtocol(Protocol):
+    code: str | Mapped[str]
 
 
 class LanguageCreatable(Base):

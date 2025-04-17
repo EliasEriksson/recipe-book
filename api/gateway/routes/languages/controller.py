@@ -17,10 +17,12 @@ class Controller(litestar.Controller):
             [schemas.Language.create(language) for language in result],
         )
 
-    @litestar.get("/{language_id:uuid}")
-    async def fetch(self, language_id: UUID) -> Response[schemas.Language]:
+    @litestar.get("/{id:uuid}")
+    async def fetch(self, id: UUID) -> Response[schemas.Language]:
         async with Database() as client:
-            result = await client.languages.fetch_by_id(language_id)
+            result = await client.languages.fetch_by_id(id)
+        if not result:
+            raise NotFoundException()
         return Response(
             schemas.Language.create(result),
             headers={Headers.last_modified: result.last_modified},
@@ -37,22 +39,22 @@ class Controller(litestar.Controller):
             headers={Headers.last_modified: result.last_modified},
         )
 
-    @litestar.put("/{language_id:uuid}")
+    @litestar.put("/{id:uuid}")
     async def update(
-        self, language_id: UUID, data: schemas.language.Language
+        self, id: UUID, data: schemas.language.Language
     ) -> Response[schemas.Language]:
-        if data.id != language_id:
+        if data.id != id:
             raise ClientException("ids not matching")
         async with Database() as client:
-            result = await client.languages.update(language_id, data)
+            result = await client.languages.update(id, data)
         return Response(
             schemas.Language.create(result),
             headers={Headers.last_modified: result.last_modified},
         )
 
-    @litestar.delete("/{language_id:uuid}")
-    async def delete(self, language_id: UUID) -> None:
+    @litestar.delete("/{id:uuid}")
+    async def delete(self, id: UUID) -> None:
         async with Database() as client:
-            result = await client.languages.delete_by_id(language_id)
+            result = await client.languages.delete_by_id(id)
         if result == 0:
             raise NotFoundException("Language not found")

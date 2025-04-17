@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import AsyncSessionTransaction
 
 from .operations import Languages
+from .operations import Recipes
 
 # from .operations import Users
 # from .operations import Password
@@ -13,6 +14,7 @@ from .operations import Languages
 class Client:
     _session: AsyncSession
     languages: Languages
+    recipes: Recipes
     # users: Users
     # emails: Emails
     # password: Password
@@ -22,6 +24,7 @@ class Client:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
         self.languages = Languages(session)
+        self.recipes = Recipes(session)
         # self.users = Users(session)
         # self.emails = Emails(session)
         # self.password = Password(session)

@@ -1,14 +1,12 @@
 from __future__ import annotations
 from typing import *
 from .creatable import LanguageCreatable
+from .creatable import CreateProtocol
 from uuid import UUID
-from datetime import datetime
-from sqlalchemy.orm import Mapped
+from ..base import IdentityProtocol
 
 
-class LanguageProtocol(Protocol):
-    id: UUID | Mapped[UUID]
-    code: str | Mapped[str]
+class LanguageProtocol(CreateProtocol, IdentityProtocol, Protocol): ...
 
 
 class Language(LanguageCreatable):
