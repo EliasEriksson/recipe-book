@@ -43,7 +43,7 @@ class Recipes:
         self._languages = languages
 
     async def fetch_translation(
-        self, id: UUID, language: models.Language
+        self, id: UUID, language: models.Language, *, lenient=False
     ) -> TranslationResult | None:
         query = (
             select(models.RecipeTranslation)
@@ -54,6 +54,8 @@ class Recipes:
             result = (await self._session.execute(query)).scalars().one_or_none()
         if result:
             return TranslationResult(result)
+        if not lenient:
+            return None
         query = (
             select(models.RecipeTranslation)
             .where(models.RecipeTranslation.recipe_id == id)
@@ -65,10 +67,23 @@ class Recipes:
             return TranslationResult(result)
         return None
 
-    async def list(self, language_codes: List[str]) -> List[Result]:
+    async def list(self, language_code: str) -> List[Result]:
         query = select(models.Recipe)
-        languages = await self._languages.fetch_by_codes(language_codes)
-        return []
+        language_result = await self._languages.fetch_by_code(language_code)
+        if not language_result:
+            return []
+        async with self._session.begin():
+            recipes = (await self._session.execute(query)).scalars().all()
+        results = [
+            Result(recipe, translation_result.translation)
+            for recipe in recipes
+            if (
+                translation_result := await self.fetch_translation(
+                    recipe.id, language_result.language
+                )
+            )
+        ]
+        return results
 
     async def fetch_by_id(self, id: UUID, language_code: str) -> Result | None:
         query = select(models.Recipe).where(models.Recipe.id == id)
@@ -79,7 +94,9 @@ class Recipes:
             recipe = (await self._session.execute(query)).scalars().one_or_none()
             if not recipe:
                 return None
-        translation_result = await self.fetch_translation(id, language_result.language)
+        translation_result = await self.fetch_translation(
+            id, language_result.language, lenient=True
+        )
         if not translation_result:
             return None
         return Result(recipe, translation_result.translation)

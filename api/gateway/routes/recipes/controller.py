@@ -10,8 +10,15 @@ from api.database import Database
 
 class Controller(litestar.Controller):
     @litestar.get("/")
-    async def list(self) -> Response[List[schemas.Recipe]]:
-        return Response([])
+    async def list(self, language: str) -> Response[List[schemas.Recipe]]:
+        async with Database() as client:
+            results = await client.recipes.list(language)
+        return Response(
+            [
+                schemas.Recipe.create(result.recipe, result.translation)
+                for result in results
+            ]
+        )
 
     @litestar.get("/{id:uuid}")
     async def fetch(self, id: UUID, language: str) -> Response[schemas.Recipe]:
