@@ -1,6 +1,6 @@
-import uuid
 from .creatable import Creatable
+from uuid import UUID
 
 
 class Recipe(Creatable):
-    id: uuid.UUID
+    id: UUID

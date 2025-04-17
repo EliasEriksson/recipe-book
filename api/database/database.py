@@ -1,4 +1,3 @@
-from __future__ import annotations
 from api.configuration import Configuration
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.ext.asyncio import async_sessionmaker
@@ -19,12 +18,21 @@ class Database:
         self._configuration = (
             configuration if configuration is not None else Configuration()
         )
-        self._engine = create_async_engine(self._configuration.database.url, echo=True)
+        self._engine = create_async_engine(self._configuration.database.url)
         self._session_maker = async_sessionmaker(self._engine, expire_on_commit=False)
 
-    async def create(self) -> None:
-        async with self._engine.begin() as connection:
-            await connection.run_sync(models.base.Base.metadata.create_all)
+    # TODO this ready function should compare the models against the live database
+    # async def ready(self) -> bool:
+    #     script = alembic.script.ScriptDirectory.from_config(
+    #         alembic.config.Config("alembic.ini")
+    #     )
+    #     async with self._engine.begin() as connection:
+    #         revision = await connection.run_sync(
+    #             lambda connection: alembic.runtime.migration.MigrationContext.configure(
+    #                 connection
+    #             ).get_current_revision()
+    #         )
+    #         return revision == script.get_current_head()
 
     async def delete(self) -> None:
         async with self._engine.begin() as connection:

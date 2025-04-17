@@ -1,5 +1,7 @@
 alembic==1.15.2
 anyio==4.9.0
+babel==2.17.0
+black==25.1.0
 certifi==2025.1.31
 click==8.1.8
 Faker==37.1.0
@@ -17,6 +19,10 @@ mdurl==0.1.2
 msgspec==0.19.0
 multidict==6.4.3
 multipart==1.2.1
+mypy-extensions==1.0.0
+packaging==24.2
+pathspec==0.12.1
+platformdirs==4.3.7
 polyfactory==2.20.0
 psycopg==3.2.6
 Pygments==2.19.1

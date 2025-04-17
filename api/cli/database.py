@@ -12,14 +12,6 @@ cli = click.Group("database")
 
 @cli.command()
 @configuration_options
-def create(**environment: Environment) -> None:
-    configuration = Configuration(cli=environment)
-    database = Database(configuration)
-    asyncio.run(database.create())
-
-
-@cli.command()
-@configuration_options
 def delete(**environment: Environment) -> None:
     configuration = Configuration(cli=environment)
     message = (

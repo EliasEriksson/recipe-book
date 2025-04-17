@@ -1,9 +1,17 @@
-from sqlalchemy.orm import mapped_column
+from __future__ import annotations
+from typing import *
 from sqlalchemy.orm import Mapped
-from sqlalchemy import String
+from sqlalchemy.orm import relationship
+from ..constants import Cascades
 from . import base
 
+if TYPE_CHECKING:
+    from .recipe_translation import RecipeTranslation
 
-class User(base.Identifiable):
-    __tablename__ = "user"
-    name: Mapped[str] = mapped_column(String(), nullable=False)
+
+class Recipe(base.Identifiable):
+    __tablename__ = "recipe"
+    translations: Mapped[list[RecipeTranslation]] = relationship(
+        back_populates="recipe",
+        cascade=Cascades.default(),
+    )

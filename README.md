@@ -8,3 +8,5 @@
 * alembic
 * msgspec
 * click
+* Babel
+* 

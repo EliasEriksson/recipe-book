@@ -1,8 +1,7 @@
-# import pydantic
-import uuid
-from ..base import Base
+import msgspec
+from uuid import UUID
 
 
-class Creatable(Base):
-    language_id: uuid.UUID
-    # name: str = pydantic.Field()
+class Creatable(msgspec.Struct):
+    language_id: UUID
+    name: str
