@@ -7,3 +7,4 @@ class Headers(Iterable):
     www_authenticate = "WWW-Authenticate"
     content_type = "Content-Type"
     last_modified = "Last-Modified"
+    accept_language = "Accept-Language"

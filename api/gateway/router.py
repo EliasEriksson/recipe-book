@@ -1,7 +1,44 @@
+from typing import *
+import re
 import litestar
+from litestar.params import Parameter
+from litestar.di import Provide
+from api.headers import Headers
 from . import routes
 
+pattern = re.compile(r"^\s*(\w{2})(?:-(\w{2}))?(?:\s*;\s*q\s*=\s*([\d.]+)\s*)?$")
+
+
+def languages(
+    header_language: Annotated[
+        str | None, Parameter(header=Headers.accept_language)
+    ] = None,
+    query_language: Annotated[str | None, Parameter(query="language")] = None,
+) -> Generator[list[str], None, None]:
+    languages: list[tuple[str, float]] = []
+    if query_language:
+        languages.append(parse_language(query_language))
+    if header_language:
+        for language in header_language.split(","):
+            if parsed := parse_language(language):
+                languages.append(parsed)
+    yield [
+        language
+        for language, _ in sorted(
+            languages, key=lambda languages: languages[1], reverse=True
+        )
+    ] or ["en"]
+
+
+def parse_language(language: str) -> tuple[str, float] | None:
+    if match := pattern.match(language):
+        groups = match.groups()
+        return groups[0], 1 if not groups[2] else float(groups[2])
+    return None
+
+
 router = litestar.Router(
+    dependencies={"languages": Provide(languages)},
     path="/api/",
     route_handlers=[
         routes.router,

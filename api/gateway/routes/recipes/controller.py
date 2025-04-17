@@ -1,6 +1,8 @@
+from typing import *
 import litestar
 from litestar import Response
-import uuid
+from litestar.exceptions import NotFoundException
+from uuid import UUID
 from api.headers import Headers
 from api import schemas
 from api.database import Database
@@ -8,20 +10,22 @@ from api.database import Database
 
 class Controller(litestar.Controller):
     @litestar.get("/")
-    async def fetch(self, recipe_id: uuid.UUID) -> str:
-        return f"/api/recipes/{recipe_id}"
+    async def list(self) -> Response[List[schemas.Recipe]]:
+        return Response([])
+
+    @litestar.get("/{id:uuid}")
+    async def fetch(self, id: UUID, languages: List[str]) -> Response[schemas.Recipe]:
+        async with Database() as client:
+            result = await client.recipes.fetch_by_id(id, languages)
+        if not result:
+            raise NotFoundException()
+        return Response(schemas.Recipe.create(result.recipe, result.translation))
 
     @litestar.post("/")
     async def create(self, data: schemas.recipe.Creatable) -> Response[schemas.Recipe]:
         async with Database() as client:
-            recipe, translation = await client.recipes.create(data)
+            result = await client.recipes.create(data)
         return Response(
-            schemas.Recipe.create(recipe, translation),
-            headers={
-                Headers.last_modified: (
-                    recipe.last_modified
-                    if recipe.modified > translation.modified
-                    else translation.last_modified
-                )
-            },
+            schemas.Recipe.create(result.recipe, result.translation),
+            headers={Headers.last_modified: result.last_modified},
         )

@@ -1,3 +1,4 @@
+from typing import *
 import litestar
 from litestar import Response
 from litestar.exceptions.http_exceptions import NotFoundException
@@ -10,11 +11,11 @@ from api.database import Database
 
 class Controller(litestar.Controller):
     @litestar.get("/")
-    async def list(self) -> Response[list[schemas.Language]]:
+    async def list(self) -> Response[List[schemas.Language]]:
         async with Database() as client:
-            result = await client.languages.list()
+            results = await client.languages.list()
         return Response(
-            [schemas.Language.create(language) for language in result],
+            [schemas.Language.create(result.language) for result in results],
         )
 
     @litestar.get("/{id:uuid}")
@@ -24,7 +25,7 @@ class Controller(litestar.Controller):
         if not result:
             raise NotFoundException()
         return Response(
-            schemas.Language.create(result),
+            schemas.Language.create(result.language),
             headers={Headers.last_modified: result.last_modified},
         )
 
@@ -35,7 +36,7 @@ class Controller(litestar.Controller):
         async with Database() as client:
             result = await client.languages.create(data)
         return Response(
-            schemas.Language.create(result),
+            schemas.Language.create(result.language),
             headers={Headers.last_modified: result.last_modified},
         )
 
@@ -44,11 +45,11 @@ class Controller(litestar.Controller):
         self, id: UUID, data: schemas.language.Language
     ) -> Response[schemas.Language]:
         if data.id != id:
-            raise ClientException("ids not matching")
+            raise ClientException()
         async with Database() as client:
             result = await client.languages.update(id, data)
         return Response(
-            schemas.Language.create(result),
+            schemas.Language.create(result.language),
             headers={Headers.last_modified: result.last_modified},
         )
 
@@ -57,4 +58,4 @@ class Controller(litestar.Controller):
         async with Database() as client:
             result = await client.languages.delete_by_id(id)
         if result == 0:
-            raise NotFoundException("Language not found")
+            raise NotFoundException()
