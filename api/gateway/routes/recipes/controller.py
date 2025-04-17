@@ -14,12 +14,15 @@ class Controller(litestar.Controller):
         return Response([])
 
     @litestar.get("/{id:uuid}")
-    async def fetch(self, id: UUID, languages: List[str]) -> Response[schemas.Recipe]:
+    async def fetch(self, id: UUID, language: str) -> Response[schemas.Recipe]:
         async with Database() as client:
-            result = await client.recipes.fetch_by_id(id, languages)
+            result = await client.recipes.fetch_by_id(id, language)
         if not result:
             raise NotFoundException()
-        return Response(schemas.Recipe.create(result.recipe, result.translation))
+        return Response(
+            schemas.Recipe.create(result.recipe, result.translation),
+            headers={Headers.last_modified: result.last_modified},
+        )
 
     @litestar.post("/")
     async def create(self, data: schemas.recipe.Creatable) -> Response[schemas.Recipe]:

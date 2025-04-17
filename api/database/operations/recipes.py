@@ -23,7 +23,7 @@ class Result:
         return (
             self.recipe.last_modified
             if self.recipe.modified > self.translation.modified
-            else self.translation.modified
+            else self.translation.last_modified
         )
 
 
@@ -42,45 +42,44 @@ class Recipes:
         self._session = session
         self._languages = languages
 
-    async def fetch_best_translation(
-        self, id: UUID, languages: List[models.Language]
+    async def fetch_translation(
+        self, id: UUID, language: models.Language
     ) -> TranslationResult | None:
+        query = (
+            select(models.RecipeTranslation)
+            .where(models.RecipeTranslation.recipe_id == id)
+            .where(models.RecipeTranslation.language_id == language.id)
+        )
         async with self._session.begin():
-            for language in languages:
-                query = (
-                    select(models.RecipeTranslation)
-                    .where(models.RecipeTranslation.recipe_id == id)
-                    .where(models.RecipeTranslation.language_id == language.id)
-                )
-                result = (await self._session.execute(query)).scalars().one_or_none()
-                if not result:
-                    continue
-                return TranslationResult(result)
+            result = (await self._session.execute(query)).scalars().one_or_none()
+        if result:
+            return TranslationResult(result)
+        query = (
+            select(models.RecipeTranslation)
+            .where(models.RecipeTranslation.recipe_id == id)
+            .order_by(models.RecipeTranslation.created)
+        )
+        async with self._session.begin():
+            result = (await self._session.execute(query)).scalars().one_or_none()
+        if result:
+            return TranslationResult(result)
         return None
 
     async def list(self, language_codes: List[str]) -> List[Result]:
         query = select(models.Recipe)
         languages = await self._languages.fetch_by_codes(language_codes)
-        # async with self._session.begin():
-
         return []
-        # query = select(models.Recipe)
-        # async with self._session.begin():
-        #     results = (await self._session.execute(query)).scalars().all()
-        # return ListResult([Result(result, ) for result in results])
 
-    async def fetch_by_id(
-        self, id: UUID, languages_codes: List[str] | None = None
-    ) -> Result | None:
+    async def fetch_by_id(self, id: UUID, language_code: str) -> Result | None:
         query = select(models.Recipe).where(models.Recipe.id == id)
-        languages = await self._languages.fetch_by_codes(languages_codes)
+        language_result = await self._languages.fetch_by_code(language_code)
+        if not language_result:
+            return None
         async with self._session.begin():
             recipe = (await self._session.execute(query)).scalars().one_or_none()
             if not recipe:
                 return None
-        translation_result = await self.fetch_best_translation(
-            id, [result.language for result in languages]
-        )
+        translation_result = await self.fetch_translation(id, language_result.language)
         if not translation_result:
             return None
         return Result(recipe, translation_result.translation)
