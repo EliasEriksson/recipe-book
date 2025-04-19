@@ -3,7 +3,7 @@ from typing import *
 from .creatable import LanguageCreatable
 from .creatable import CreateProtocol
 from uuid import UUID
-from ..base import IdentityProtocol
+from ..identifiable import IdentityProtocol
 
 
 class LanguageProtocol(CreateProtocol, IdentityProtocol, Protocol): ...

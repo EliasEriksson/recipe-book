@@ -43,7 +43,7 @@ class Recipes:
         self._languages = languages
 
     async def fetch_translation(
-        self, id: UUID, language: models.Language, *, lenient=False
+        self, id: UUID, language: models.Language, *, original_fallback=False
     ) -> TranslationResult | None:
         query = (
             select(models.RecipeTranslation)
@@ -54,7 +54,7 @@ class Recipes:
             result = (await self._session.execute(query)).scalars().one_or_none()
         if result:
             return TranslationResult(result)
-        if not lenient:
+        if not original_fallback:
             return None
         query = (
             select(models.RecipeTranslation)
@@ -95,7 +95,7 @@ class Recipes:
             if not recipe:
                 return None
         translation_result = await self.fetch_translation(
-            id, language_result.language, lenient=True
+            id, language_result.language, original_fallback=True
         )
         if not translation_result:
             return None

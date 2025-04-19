@@ -20,7 +20,7 @@ class Controller(litestar.Controller):
             ]
         )
 
-    @litestar.get("/{id:uuid}")
+    @litestar.get("/{id:uuid}/language/{language_id:uuid}")
     async def fetch(self, id: UUID, language: str) -> Response[schemas.Recipe]:
         async with Database() as client:
             result = await client.recipes.fetch_by_id(id, language)
@@ -39,3 +39,11 @@ class Controller(litestar.Controller):
             schemas.Recipe.create(result.recipe, result.translation),
             headers={Headers.last_modified: result.last_modified},
         )
+
+    @litestar.put("/{id:uuid}/language/{language_id:uuid}")
+    async def change(self):
+        pass
+
+    @litestar.delete("/{id:uuid}/language/{language_id:uuid}")
+    async def delete(self):
+        pass
