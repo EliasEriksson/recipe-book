@@ -21,6 +21,7 @@ Accept-Language: sv, en-gb;q=0.8, en;q=0.7
 ```http response
 HTTP/1.1 200 OK
 Content-Type: application/json
+
 [
     {
         "id": "1234",
@@ -51,12 +52,13 @@ Content-Type: application/json
 
 #### Fetch one
 ```http request
-GET /api/recipes/1234/language/1234 HTTP/1.1
+GET /api/recipes/1234/languages/1234 HTTP/1.1
 Accept-Language: sv, en-gb;q=0.8, en;q=0.7
 ```
 ```http response
 HTTP/1.1 200 OK
 Content-Type: application/json
+Link: /api/recipes/1234/languages/2341; rel="alternate"; hreflang="sv"
 
 {
     "id": "1234",
@@ -82,18 +84,12 @@ Content-Type: application/json
 {
     "id": "1234",
     "name": "Cake",
-    languageId": "2341",
-    "languages": [
-        {
-            "id": "1234",
-            "code": "en"
-        }
-    ]
+    languageId": "2341"
 }
 ```
 #### Update recipe
 ```http request
-PUT /api/recipes/1234/language/1234 HTTP/1.1
+PUT /api/recipes/1234/languages/1234 HTTP/1.1
 Accept-Language: sv, en-gb;q=0.8, en;q=0.7
 Content-Type: application/json
 
@@ -106,6 +102,7 @@ Content-Type: application/json
 ```http response
 HTTP/1.1 200 OK
 Content-Type: application/json
+Link: /api/recipes/1234/languages/2341; rel="alternate"; hreflang="sv"
 
 {
     "id": "1234,
@@ -115,7 +112,7 @@ Content-Type: application/json
 ```
 #### Delete translation
 ```http request
-DELETE /api/recipes/1234/language/1234 HTTP/1.1
+DELETE /api/recipes/1234/languages/1234 HTTP/1.1
 Accept-Language: sv, en-gb;q=0.8, en;q=0.7
 ```
 ```http response
