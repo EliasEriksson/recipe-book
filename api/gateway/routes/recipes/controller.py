@@ -41,9 +41,9 @@ class Controller(litestar.Controller):
         )
 
     @litestar.put("/{id:uuid}/language/{language_id:uuid}")
-    async def change(self):
+    async def change(self) -> None:
         pass
 
     @litestar.delete("/{id:uuid}/language/{language_id:uuid}")
-    async def delete(self):
+    async def delete(self) -> None:
         pass
