@@ -1,6 +1,7 @@
 # Recipe book
 
 ## python packages
+
 * uvicorn
 * litestar
 * SQLAlchemy
@@ -10,14 +11,20 @@
 * click
 * Babel
 
-
 ## Request response for endpoints
+
 ### Recipe
+
 #### List
+
+Lists recipies in the users most preferred language.
+If query parameter ``
+
 ```http request
 GET /api/recipes HTTP/1.1
 Accept-Language: sv, en-gb;q=0.8, en;q=0.7
 ```
+
 ```http response
 HTTP/1.1 200 OK
 Content-Type: application/json
@@ -30,11 +37,14 @@ Content-Type: application/json
     }
 ]
 ```
+
 #### List available translations
+
 ```http request
 GET /api/recipes/1234/languages HTTP/1.1
 Accept-Language: sv, en-gb;q=0.8, en;q=0.7
 ```
+
 ```http response
 HTTP/1.1 200 OK
 Content-Type: application/json
@@ -51,10 +61,12 @@ Content-Type: application/json
 ```
 
 #### Fetch one
+
 ```http request
 GET /api/recipes/1234/languages/1234 HTTP/1.1
 Accept-Language: sv, en-gb;q=0.8, en;q=0.7
 ```
+
 ```http response
 HTTP/1.1 200 OK
 Content-Type: application/json
@@ -66,7 +78,9 @@ Link: /api/recipes/1234/languages/2341; rel="alternate"; hreflang="sv"
     languageId": "1234"
 }
 ```
+
 #### Create
+
 ```http request
 POST /api/recipes HTTP/1.1
 Accept-Language: sv, en-gb;q=0.8, en;q=0.7
@@ -77,6 +91,7 @@ Content-Type: application/json
     "languageId": "1234"
 }
 ```
+
 ```http response
 HTTP/1.1 200 OK
 Content-Type: application/json
@@ -87,7 +102,9 @@ Content-Type: application/json
     languageId": "2341"
 }
 ```
+
 #### Update recipe
+
 ```http request
 PUT /api/recipes/1234/languages/1234 HTTP/1.1
 Accept-Language: sv, en-gb;q=0.8, en;q=0.7
@@ -99,6 +116,7 @@ Content-Type: application/json
     "languageId": "1234"
 }
 ```
+
 ```http response
 HTTP/1.1 200 OK
 Content-Type: application/json
@@ -110,19 +128,25 @@ Link: /api/recipes/1234/languages/2341; rel="alternate"; hreflang="sv"
     "languageId": "1234"
 }
 ```
+
 #### Delete translation
+
 ```http request
 DELETE /api/recipes/1234/languages/1234 HTTP/1.1
 Accept-Language: sv, en-gb;q=0.8, en;q=0.7
 ```
+
 ```http response
 HTTP/1.1 204 No Content
 ```
+
 #### Delete entire recipe and all translations
+
 ```http request
 DELETE /api/recipes/1234 HTTP/1.1
 Accept-Language: sv, en-gb;q=0.8, en;q=0.7
 ```
+
 ```http response
 HTTP/1.1 204 No Content
 ```

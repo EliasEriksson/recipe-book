@@ -15,6 +15,7 @@ from babel.dates import format_datetime
 def format(datetime: datetime) -> str:
     return f"{format_datetime(datetime, "EEE, d MMM y HH:mm:ss", tzinfo=timezone.utc, locale="en")} GMT"
 
+
 class Base(AsyncAttrs, DeclarativeBase):
     created: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -36,8 +37,8 @@ class Base(AsyncAttrs, DeclarativeBase):
 
     def __setattr__(self, key: str, value: Any):
         if (
-            not key.startswith("_") and
-            key != "modified"
+            not key.startswith("_")
+            and key != "modified"
             and self.modified is not None
             and getattr(self, key) != value
         ):

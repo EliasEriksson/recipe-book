@@ -14,7 +14,7 @@ def language(
         str | None, Parameter(header=Headers.accept_language)
     ] = None,
     query_language: Annotated[str | None, Parameter(query="language")] = None,
-) -> Generator[str, None, None]:
+) -> Generator[str | None, None, None]:
     languages: list[tuple[str, float]] = []
     if query_language:
         languages.append(parse_language(query_language))
@@ -22,15 +22,13 @@ def language(
         for language in header_language.split(","):
             if parsed := parse_language(language):
                 languages.append(parsed)
-    yield (
-        [
-            language
-            for language, _ in sorted(
-                languages, key=lambda languages: languages[1], reverse=True
-            )
-        ]
-        or ["en"]
-    )[0]
+    language_priority = [
+        language
+        for language, _ in sorted(
+            languages, key=lambda languages: languages[1], reverse=True
+        )
+    ]
+    yield language_priority[0] if language_priority else None
 
 
 def parse_language(language: str) -> tuple[str, float] | None:

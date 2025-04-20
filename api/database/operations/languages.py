@@ -48,7 +48,9 @@ class Languages:
             result = (await self._session.execute(query)).scalars().one_or_none()
         return Result(result) if result else None
 
-    async def fetch_by_code(self, code: str) -> Result | None:
+    async def fetch_by_code(self, code: str | None) -> Result | None:
+        if code is None:
+            return None
         query = select(models.Language).where(models.Language.code == code)
         async with self._session.begin():
             result = (await self._session.execute(query)).scalars().one_or_none()

@@ -3,6 +3,7 @@ from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy import delete
+from sqlalchemy.orm import selectinload
 from .. import models
 from api import schemas
 from .languages import Languages
@@ -67,25 +68,44 @@ class Recipes:
             return TranslationResult(result)
         return None
 
-    async def list(self, language_code: str) -> List[Result]:
-        query = select(models.Recipe)
-        language_result = await self._languages.fetch_by_code(language_code)
-        if not language_result:
-            return []
+    async def list(self, language_code: str | None) -> List[Result]:
+        query = select(models.RecipeTranslation, models.Recipe)
+        query = query.join(models.Recipe).options(
+            selectinload(models.RecipeTranslation.recipe)
+        )
         async with self._session.begin():
-            recipes = (await self._session.execute(query)).scalars().all()
-        results = [
-            Result(recipe, translation_result.translation)
-            for recipe in recipes
-            if (
-                translation_result := await self.fetch_translation(
-                    recipe.id, language_result.language
-                )
-            )
-        ]
-        return results
+            results = (await self._session.execute(query)).scalars().all()
+        for result in results:
+            print(result.recipe)
+        # raise NotImplemented
+        # query = select(models.Recipe).join(models.RecipeTranslation)
+        # if language_code is not None:
+        #     query = query.join(models.Language).where(
+        #         models.Language.code == language_code
+        #     )
+        # else:
+        #     query = query
+        # language = await self._languages.fetch_by_code(language_code)
+        # language_result = await self._languages.fetch_by_code(language_code)
+        # if not language_result:
+        #     return []
+        # async with self._session.begin():
+        #     recipes = (await self._session.execute(query)).scalars().all()
+        # results = [
+        #     Result(recipe, translation_result.translation)
+        #     for recipe in recipes
+        #     if (
+        #         translation_result := await self.fetch_translation(
+        #             recipe.id, language_result.language
+        #         )
+        #     )
+        # ]
+        # return results
+        return []
 
-    async def fetch_by_id(self, id: UUID, language_code: str) -> Result | None:
+    async def fetch_by_id(
+        self, id: UUID, language_code: str | None = None
+    ) -> Result | None:
         query = select(models.Recipe).where(models.Recipe.id == id)
         language_result = await self._languages.fetch_by_code(language_code)
         if not language_result:
@@ -110,8 +130,25 @@ class Recipes:
             self._session.add(translation)
         return Result(recipe, translation)
 
-    async def update(self, recipe: schemas.recipe.RecipeProtocol) -> Result:
-        pass
+    async def update(self, id: UUID, recipe: schemas.recipe.RecipeProtocol) -> Result:
+        query = (
+            select(models.Recipe, models.RecipeTranslation)
+            .join(models.RecipeTranslation)
+            .where(models.Recipe.id == id)
+            .options(selectinload(models.Recipe.translations))
+        )
+        async with self._session.begin():
+            result = (await self._session.execute(query)).scalars().one()
+            for translation in result.translations:
+                if translation.language_id == recipe.language_id:
+                    translation.update(recipe)
+                    break
+            else:
+                translation = models.RecipeTranslation.create(result, recipe)
+                self._session.add(translation)
+                result.translations.append(translation)
+            result.update(recipe)
+        return Result(result, translation)
 
     async def delete_by_id(self, id: UUID) -> bool:
         query = delete(models.Recipe).where(models.Recipe.id == id)
