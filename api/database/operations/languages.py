@@ -24,16 +24,26 @@ class Languages:
 
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
-        self.model = models.Language
 
     async def list(self) -> List[Result]:
-        query = select(self.model)
+        query = select(models.Language)
         async with self._session.begin():
             results = (await self._session.execute(query)).scalars().all()
         return [Result(result) for result in results]
 
+    async def list_by_recipe(self, recipe_id: UUID) -> List[Result]:
+        query = (
+            select(models.Language)
+            .join(models.RecipeTranslation)
+            .join(models.Recipe)
+            .where(models.Recipe.id == recipe_id)
+        )
+        async with self._session.begin():
+            results = (await self._session.execute(query)).scalars().all()
+        return [Result(language) for language in results]
+
     async def fetch_by_id(self, id: UUID) -> Result | None:
-        query = select(self.model).where(models.Language.id == id)
+        query = select(models.Language).where(models.Language.id == id)
         async with self._session.begin():
             result = (await self._session.execute(query)).scalars().one_or_none()
         return Result(result) if result else None
@@ -57,7 +67,7 @@ class Languages:
         return [Result(result) for result in results]
 
     async def create(self, language: schemas.language.CreateProtocol) -> Result:
-        result = self.model.create(language)
+        result = models.Language.create(language)
         async with self._session.begin():
             self._session.add(result)
         return Result(result)
@@ -71,7 +81,7 @@ class Languages:
         return Result(result.language)
 
     async def delete_by_id(self, id: UUID) -> bool:
-        query = delete(self.model).where(self.model.id == id)
+        query = delete(models.Language).where(models.Language.id == id)
         async with self._session.begin():
             result = await self._session.execute(query)
         return cast(int, result.rowcount) > 0
