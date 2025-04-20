@@ -130,7 +130,7 @@ class Recipes:
             self._session.add(translation)
         return Result(recipe, translation)
 
-    async def update(self, id: UUID, recipe: schemas.recipe.RecipeProtocol) -> Result:
+    async def update(self, id: UUID, data: schemas.recipe.RecipeProtocol) -> Result:
         query = (
             select(models.Recipe, models.RecipeTranslation)
             .join(models.RecipeTranslation)
@@ -138,17 +138,17 @@ class Recipes:
             .options(selectinload(models.Recipe.translations))
         )
         async with self._session.begin():
-            result = (await self._session.execute(query)).scalars().one()
-            for translation in result.translations:
-                if translation.language_id == recipe.language_id:
-                    translation.update(recipe)
+            recipe = (await self._session.execute(query)).scalars().one()
+            for translation in recipe.translations:
+                if translation.language_id == data.language_id:
+                    translation.update(data)
                     break
             else:
-                translation = models.RecipeTranslation.create(result, recipe)
+                translation = models.RecipeTranslation.create(recipe, data)
                 self._session.add(translation)
-                result.translations.append(translation)
-            result.update(recipe)
-        return Result(result, translation)
+                recipe.translations.append(translation)
+            recipe.update(data)
+        return Result(recipe, translation)
 
     async def delete_by_id(self, id: UUID) -> bool:
         query = delete(models.Recipe).where(models.Recipe.id == id)
