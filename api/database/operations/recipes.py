@@ -3,6 +3,7 @@ from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy import delete
+from sqlalchemy import func
 from sqlalchemy.orm import selectinload
 from .. import models
 from api import schemas
@@ -69,57 +70,43 @@ class Recipes:
         return None
 
     async def list(self, language_code: str | None) -> List[Result]:
-        query = select(models.RecipeTranslation, models.Recipe)
-        query = query.join(models.Recipe).options(
-            selectinload(models.RecipeTranslation.recipe)
-        )
+        if language_code is None:
+            query = (
+                select(
+                    models.RecipeTranslation, func.min(models.RecipeTranslation.created)
+                )
+                .distinct(models.RecipeTranslation.recipe_id)
+                .group_by(
+                    models.RecipeTranslation.recipe_id,
+                    models.RecipeTranslation.language_id,
+                )
+                .join(models.Recipe)
+                .options(selectinload(models.RecipeTranslation.recipe))
+            )
+        else:
+            query = (
+                select(models.RecipeTranslation)
+                .join(models.Language)
+                .where(models.Language.code == language_code)
+                .join(models.Recipe)
+                .options(selectinload(models.RecipeTranslation.recipe))
+            )
         async with self._session.begin():
-            results = (await self._session.execute(query)).scalars().all()
-        for result in results:
-            print(result.recipe)
-        # raise NotImplemented
-        # query = select(models.Recipe).join(models.RecipeTranslation)
-        # if language_code is not None:
-        #     query = query.join(models.Language).where(
-        #         models.Language.code == language_code
-        #     )
-        # else:
-        #     query = query
-        # language = await self._languages.fetch_by_code(language_code)
-        # language_result = await self._languages.fetch_by_code(language_code)
-        # if not language_result:
-        #     return []
-        # async with self._session.begin():
-        #     recipes = (await self._session.execute(query)).scalars().all()
-        # results = [
-        #     Result(recipe, translation_result.translation)
-        #     for recipe in recipes
-        #     if (
-        #         translation_result := await self.fetch_translation(
-        #             recipe.id, language_result.language
-        #         )
-        #     )
-        # ]
-        # return results
-        return []
+            translations = (await self._session.execute(query)).scalars().all()
 
-    async def fetch_by_id(
-        self, id: UUID, language_code: str | None = None
-    ) -> Result | None:
-        query = select(models.Recipe).where(models.Recipe.id == id)
-        language_result = await self._languages.fetch_by_code(language_code)
-        if not language_result:
-            return None
-        async with self._session.begin():
-            recipe = (await self._session.execute(query)).scalars().one_or_none()
-            if not recipe:
-                return None
-        translation_result = await self.fetch_translation(
-            id, language_result.language, original_fallback=True
+        return [Result(translation.recipe, translation) for translation in translations]
+
+    async def fetch_by_id(self, id: UUID, language_id: UUID) -> Result | None:
+        query = (
+            select(models.RecipeTranslation)
+            .where(models.RecipeTranslation.language_id == language_id)
+            .where(models.RecipeTranslation.recipe_id == id)
+            .join(models.Recipe)
+            .options(selectinload(models.RecipeTranslation.recipe))
         )
-        if not translation_result:
-            return None
-        return Result(recipe, translation_result.translation)
+        async with self._session.begin():
+            translation = (await self._session.execute(query)).scalars().one()
+        return Result(translation.recipe, translation)
 
     async def create(self, creatable: schemas.recipe.CreateProtocol) -> Result:
         async with self._session.begin():

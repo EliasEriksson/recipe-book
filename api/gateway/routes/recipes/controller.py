@@ -22,9 +22,9 @@ class Controller(litestar.Controller):
         )
 
     @litestar.get("/{id:uuid}/languages/{language_id:uuid}")
-    async def fetch(self, id: UUID, language: str) -> Response[schemas.Recipe]:
+    async def fetch(self, id: UUID, language_id: UUID) -> Response[schemas.Recipe]:
         async with Database() as client:
-            result = await client.recipes.fetch_by_id(id, language)
+            result = await client.recipes.fetch_by_id(id, language_id)
         if not result:
             raise NotFoundException()
         return Response(
