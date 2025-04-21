@@ -60,6 +60,18 @@ class Controller(litestar.Controller):
             headers={Headers.last_modified: result.last_modified},
         )
 
+    @litestar.delete("/{id:uuid}")
+    async def delete(self, id: UUID) -> Response[None]:
+        async with Database() as client:
+            result = await client.recipes.delete(id)
+        if not result:
+            raise NotFoundException()
+        return Response(None)
+
     @litestar.delete("/{id:uuid}/languages/{language_id:uuid}")
-    async def delete(self) -> None:
-        pass
+    async def delete_translation(self, id: UUID, language_id: UUID) -> Response[None]:
+        async with Database() as client:
+            result = await client.recipes.delete_translation(id, language_id)
+        if not result:
+            raise NotFoundException()
+        return Response(None)
