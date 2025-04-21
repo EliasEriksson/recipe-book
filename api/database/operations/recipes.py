@@ -9,6 +9,9 @@ from sqlalchemy.orm import selectinload
 from .. import models
 from api import schemas
 from .languages import Languages
+from .paging import Page
+from .paging import PageResult
+from datetime import datetime
 
 
 class Result:
@@ -22,26 +25,15 @@ class Result:
         self.translation = translation
 
     @property
-    def last_modified(self) -> str:
+    def modified(self) -> datetime:
         return (
-            self.recipe.last_modified
+            self.recipe.modified
             if self.recipe.modified > self.translation.modified
-            else self.translation.last_modified
+            else self.translation.modified
         )
 
 
-class Page:
-    offset: int
-    limit: int
-    results: List[Result]
-
-    def __init__(self, offset: int, limit: int, results: List[Result]) -> None:
-        self.offset = offset
-        self.limit = limit
-        self.results = results
-
-
-class Recipes:
+class Recipes(Page):
     _session: AsyncSession
     _languages: Languages
 
@@ -49,7 +41,12 @@ class Recipes:
         self._session = session
         self._languages = languages
 
-    async def list(self, language_code: str | None, offset: int, limit: int) -> Page:
+    async def list(
+        self,
+        language_code: str | None,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> PageResult[Result]:
         if language_code is None:
             query = (
                 select(
@@ -68,18 +65,18 @@ class Recipes:
                 .where(models.Language.code == language_code)
                 .order_by(desc(models.RecipeTranslation.created))
             )
-        query = (
-            query.join(models.Recipe)
-            .options(selectinload(models.RecipeTranslation.recipe))
-            .offset(offset * limit)
-            .limit(limit)
+        query = query.join(models.Recipe).options(
+            selectinload(models.RecipeTranslation.recipe)
         )
+        query = self.page(query, limit, offset)
         async with self._session.begin():
             translations = (await self._session.execute(query)).scalars().all()
 
-        return Page(
-            offset,
+        return PageResult(
             limit,
+            offset,
+            # TODO fix this 100
+            100,
             [Result(translation.recipe, translation) for translation in translations],
         )
 

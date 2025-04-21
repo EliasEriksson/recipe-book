@@ -48,6 +48,11 @@ Accept-Language: sv, en-gb;q=0.8, en;q=0.7
 ```http response
 HTTP/1.1 200 OK
 Content-Type: application/json
+Link: <?limit=10&offset=0>; rel="first"',
+Link: <?limit=10&offset=1>; rel="prev"',
+Link: <?limit=10&offset=3>; rel="next"',
+Link: <?limit=10&offset=4; rel="last">',
+
 [
     {
         "id": "1234",

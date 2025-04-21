@@ -5,7 +5,7 @@ from litestar.params import Parameter
 from litestar.exceptions import NotFoundException
 from litestar.exceptions import ClientException
 from uuid import UUID
-from api.headers import Headers
+from api.headers import Header
 from api import schemas
 from api.database import Database
 
@@ -15,27 +15,33 @@ class Controller(litestar.Controller):
     async def list(
         self,
         language_code: str | None,
-        offset: Annotated[int, Parameter(query="offset")] = 0,
         limit: Annotated[int, Parameter(query="limit")] = 20,
+        offset: Annotated[int, Parameter(query="offset")] = 0,
     ) -> Response[List[schemas.Recipe]]:
         async with Database() as client:
-            page = await client.recipes.list(language_code, offset, limit)
+            result = await client.recipes.list(language_code, limit, offset)
         return Response(
             [
                 schemas.Recipe.create(result.recipe, result.translation)
-                for result in page.results
-            ]
+                for result in result.results
+            ],
+            headers=Header.paging_links(limit, offset, result.count),
         )
 
     @litestar.get("/{id:uuid}/languages/{language_id:uuid}")
     async def fetch(self, id: UUID, language_id: UUID) -> Response[schemas.Recipe]:
         async with Database() as client:
             result = await client.recipes.fetch_by_id(id, language_id)
+            language_result = await client.languages.list_by_recipe(result.recipe.id)
         if not result:
             raise NotFoundException()
         return Response(
             schemas.Recipe.create(result.recipe, result.translation),
-            headers={Headers.last_modified: result.last_modified},
+            headers=Header.last_modified(result.modified)
+            | Header.translations_links(
+                result.translation,
+                [result.language for result in language_result.results],
+            ),
         )
 
     @litestar.post("/")
@@ -44,7 +50,7 @@ class Controller(litestar.Controller):
             result = await client.recipes.create(data)
         return Response(
             schemas.Recipe.create(result.recipe, result.translation),
-            headers={Headers.last_modified: result.last_modified},
+            headers=Header.last_modified(result.modified),
         )
 
     @litestar.put("/{id:uuid}/languages/{language_id:uuid}")
@@ -57,7 +63,7 @@ class Controller(litestar.Controller):
             result = await client.recipes.update(id, data)
         return Response(
             schemas.Recipe.create(result.recipe, result.translation),
-            headers={Headers.last_modified: result.last_modified},
+            headers=Header.last_modified(result.modified),
         )
 
     @litestar.delete("/{id:uuid}")

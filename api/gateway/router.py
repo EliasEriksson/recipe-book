@@ -3,7 +3,7 @@ import re
 import litestar
 from litestar.params import Parameter
 from litestar.di import Provide
-from api.headers import Headers
+from api.headers import Header
 from . import routes
 
 pattern = re.compile(r"^\s*(\w{2})(?:-(\w{2}))?(?:\s*;\s*q\s*=\s*([\d.]+)\s*)?$")
@@ -11,7 +11,7 @@ pattern = re.compile(r"^\s*(\w{2})(?:-(\w{2}))?(?:\s*;\s*q\s*=\s*([\d.]+)\s*)?$"
 
 def language(
     header_language: Annotated[
-        str | None, Parameter(header=Headers.accept_language)
+        str | None, Parameter(header=Header.Names.accept_language)
     ] = None,
     query_language: Annotated[str | None, Parameter(query="language")] = None,
 ) -> Generator[str | None, None, None]:

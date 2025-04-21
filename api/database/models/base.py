@@ -9,11 +9,6 @@ from datetime import datetime
 from datetime import timezone
 from uuid import UUID
 from ..constants import gen_random_uuid
-from babel.dates import format_datetime
-
-
-def format(datetime: datetime) -> str:
-    return f"{format_datetime(datetime, "EEE, d MMM y HH:mm:ss", tzinfo=timezone.utc, locale="en")} GMT"
 
 
 class Base(AsyncAttrs, DeclarativeBase):
@@ -27,10 +22,6 @@ class Base(AsyncAttrs, DeclarativeBase):
         nullable=False,
         default=lambda: datetime.now(tz=timezone.utc),
     )
-
-    @property
-    def last_modified(self) -> str:
-        return format(self.modified)
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}()"

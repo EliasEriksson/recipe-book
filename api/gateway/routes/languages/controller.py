@@ -5,7 +5,7 @@ from litestar.exceptions.http_exceptions import NotFoundException
 from litestar.exceptions.http_exceptions import ClientException
 from uuid import UUID
 from api import schemas
-from api.headers import Headers
+from api.headers import Header
 from api.database import Database
 
 
@@ -13,9 +13,9 @@ class Controller(litestar.Controller):
     @litestar.get("/")
     async def list(self) -> Response[List[schemas.Language]]:
         async with Database() as client:
-            results = await client.languages.list()
+            result = await client.languages.list()
         return Response(
-            [schemas.Language.create(result.language) for result in results],
+            [schemas.Language.create(result.language) for result in result.results],
         )
 
     @litestar.get("/{id:uuid}")
@@ -26,7 +26,7 @@ class Controller(litestar.Controller):
             raise NotFoundException()
         return Response(
             schemas.Language.create(result.language),
-            headers={Headers.last_modified: result.last_modified},
+            headers=Header.last_modified(result.modified),
         )
 
     @litestar.post("/")
@@ -37,7 +37,7 @@ class Controller(litestar.Controller):
             result = await client.languages.create(data)
         return Response(
             schemas.Language.create(result.language),
-            headers={Headers.last_modified: result.last_modified},
+            headers=Header.last_modified(result.modified),
         )
 
     @litestar.put("/{id:uuid}")
@@ -50,12 +50,12 @@ class Controller(litestar.Controller):
             result = await client.languages.update(id, data)
         return Response(
             schemas.Language.create(result.language),
-            headers={Headers.last_modified: result.last_modified},
+            headers=Header.last_modified(result.modified),
         )
 
     @litestar.delete("/{id:uuid}")
     async def delete(self, id: UUID) -> None:
         async with Database() as client:
-            result = await client.languages.delete_by_id(id)
+            result = await client.languages.delete(id)
         if result == 0:
             raise NotFoundException()

@@ -5,6 +5,9 @@ from sqlalchemy import select
 from sqlalchemy import delete
 from .. import models
 from api import schemas
+from .paging import Page
+from .paging import PageResult
+from datetime import datetime
 
 
 class Result:
@@ -14,59 +17,57 @@ class Result:
         self.language = language
 
     @property
-    def last_modified(self) -> str:
-        return self.language.last_modified
+    def modified(self) -> datetime:
+        return self.language.modified
 
 
-class Languages:
+class Languages(Page):
     _session: AsyncSession
-    model: Type[models.Language]
 
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def list(self) -> List[Result]:
+    async def list(
+        self,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> PageResult[Result]:
         query = select(models.Language)
+        query = self.page(query, limit, offset)
         async with self._session.begin():
             results = (await self._session.execute(query)).scalars().all()
-        return [Result(result) for result in results]
+        return PageResult(
+            limit,
+            offset,
+            [Result(result) for result in results],
+        )
 
-    async def list_by_recipe(self, recipe_id: UUID) -> List[Result]:
+    async def list_by_recipe(
+        self,
+        recipe_id: UUID,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> PageResult[Result]:
         query = (
             select(models.Language)
             .join(models.RecipeTranslation)
             .join(models.Recipe)
             .where(models.Recipe.id == recipe_id)
         )
+        query = self.page(query, limit, offset)
         async with self._session.begin():
             results = (await self._session.execute(query)).scalars().all()
-        return [Result(language) for language in results]
+        return PageResult(
+            limit,
+            offset,
+            [Result(language) for language in results],
+        )
 
     async def fetch_by_id(self, id: UUID) -> Result | None:
         query = select(models.Language).where(models.Language.id == id)
         async with self._session.begin():
             result = (await self._session.execute(query)).scalars().one_or_none()
         return Result(result) if result else None
-
-    async def fetch_by_code(self, code: str | None) -> Result | None:
-        if code is None:
-            return None
-        query = select(models.Language).where(models.Language.code == code)
-        async with self._session.begin():
-            result = (await self._session.execute(query)).scalars().one_or_none()
-        return Result(result) if result else None
-
-    async def fetch_by_codes(self, codes: List[str]) -> List[Result]:
-        fetched_codes = set()
-        results: list[models.Language] = []
-        for code in codes:
-            if code in fetched_codes:
-                continue
-            fetched_codes.add(code)
-            if (result := await self.fetch_by_code(code)) is None:
-                continue
-            results.append(result.language)
-        return [Result(result) for result in results]
 
     async def create(self, language: schemas.language.CreateProtocol) -> Result:
         result = models.Language.create(language)
@@ -82,7 +83,7 @@ class Languages:
             result.language.update(language)
         return Result(result.language)
 
-    async def delete_by_id(self, id: UUID) -> bool:
+    async def delete(self, id: UUID) -> bool:
         query = delete(models.Language).where(models.Language.id == id)
         async with self._session.begin():
             result = await self._session.execute(query)
