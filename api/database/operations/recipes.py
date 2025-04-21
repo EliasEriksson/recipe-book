@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy import delete
 from sqlalchemy import func
+from sqlalchemy import desc
 from sqlalchemy.orm import selectinload
 from .. import models
 from api import schemas
@@ -29,11 +30,15 @@ class Result:
         )
 
 
-class TranslationResult:
-    translation: models.RecipeTranslation
+class Page:
+    offset: int
+    limit: int
+    results: List[Result]
 
-    def __init__(self, translation: models.RecipeTranslation) -> None:
-        self.translation = translation
+    def __init__(self, offset: int, limit: int, results: List[Result]) -> None:
+        self.offset = offset
+        self.limit = limit
+        self.results = results
 
 
 class Recipes:
@@ -44,32 +49,7 @@ class Recipes:
         self._session = session
         self._languages = languages
 
-    async def fetch_translation(
-        self, id: UUID, language: models.Language, *, original_fallback=False
-    ) -> TranslationResult | None:
-        query = (
-            select(models.RecipeTranslation)
-            .where(models.RecipeTranslation.recipe_id == id)
-            .where(models.RecipeTranslation.language_id == language.id)
-        )
-        async with self._session.begin():
-            result = (await self._session.execute(query)).scalars().one_or_none()
-        if result:
-            return TranslationResult(result)
-        if not original_fallback:
-            return None
-        query = (
-            select(models.RecipeTranslation)
-            .where(models.RecipeTranslation.recipe_id == id)
-            .order_by(models.RecipeTranslation.created)
-        )
-        async with self._session.begin():
-            result = (await self._session.execute(query)).scalars().one_or_none()
-        if result:
-            return TranslationResult(result)
-        return None
-
-    async def list(self, language_code: str | None) -> List[Result]:
+    async def list(self, language_code: str | None, offset: int, limit: int) -> Page:
         if language_code is None:
             query = (
                 select(
@@ -80,21 +60,28 @@ class Recipes:
                     models.RecipeTranslation.recipe_id,
                     models.RecipeTranslation.language_id,
                 )
-                .join(models.Recipe)
-                .options(selectinload(models.RecipeTranslation.recipe))
             )
         else:
             query = (
                 select(models.RecipeTranslation)
                 .join(models.Language)
                 .where(models.Language.code == language_code)
-                .join(models.Recipe)
-                .options(selectinload(models.RecipeTranslation.recipe))
+                .order_by(desc(models.RecipeTranslation.created))
             )
+        query = (
+            query.join(models.Recipe)
+            .options(selectinload(models.RecipeTranslation.recipe))
+            .offset(offset * limit)
+            .limit(limit)
+        )
         async with self._session.begin():
             translations = (await self._session.execute(query)).scalars().all()
 
-        return [Result(translation.recipe, translation) for translation in translations]
+        return Page(
+            offset,
+            limit,
+            [Result(translation.recipe, translation) for translation in translations],
+        )
 
     async def fetch_by_id(self, id: UUID, language_id: UUID) -> Result | None:
         query = (
@@ -137,8 +124,18 @@ class Recipes:
             recipe.update(data)
         return Result(recipe, translation)
 
-    async def delete_by_id(self, id: UUID) -> bool:
+    async def delete(self, id: UUID) -> bool:
         query = delete(models.Recipe).where(models.Recipe.id == id)
+        async with self._session.begin():
+            result = await self._session.execute(query)
+        return cast(int, result.rowcount) > 0
+
+    async def delete_translation(self, id: UUID, language_id: UUID) -> bool:
+        query = (
+            delete(models.RecipeTranslation)
+            .where(models.RecipeTranslation.recipe_id == id)
+            .where(models.RecipeTranslation.language_id == language_id)
+        )
         async with self._session.begin():
             result = await self._session.execute(query)
         return cast(int, result.rowcount) > 0

@@ -42,7 +42,7 @@ def parse_language(language: str) -> tuple[str, float] | None:
 
 
 router = litestar.Router(
-    dependencies={"language": Provide(language)},
+    dependencies={"language_code": Provide(language)},
     path="/api/",
     route_handlers=[
         routes.router,

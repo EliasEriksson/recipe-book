@@ -1,6 +1,7 @@
 from typing import *
 import litestar
 from litestar import Response
+from litestar.params import Parameter
 from litestar.exceptions import NotFoundException
 from litestar.exceptions import ClientException
 from uuid import UUID
@@ -11,13 +12,18 @@ from api.database import Database
 
 class Controller(litestar.Controller):
     @litestar.get("/")
-    async def list(self, language: str | None) -> Response[List[schemas.Recipe]]:
+    async def list(
+        self,
+        language_code: str | None,
+        offset: Annotated[int, Parameter(query="offset")] = 0,
+        limit: Annotated[int, Parameter(query="limit")] = 20,
+    ) -> Response[List[schemas.Recipe]]:
         async with Database() as client:
-            results = await client.recipes.list(language)
+            page = await client.recipes.list(language_code, offset, limit)
         return Response(
             [
                 schemas.Recipe.create(result.recipe, result.translation)
-                for result in results
+                for result in page.results
             ]
         )
 
