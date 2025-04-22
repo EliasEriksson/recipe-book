@@ -33,7 +33,7 @@ Content-Type: application/json
     {
         "id": "1234",
         "name": "Tårta",
-        language_id": "2341"
+        "language_id": "2341"
     }
 ]
 ```
@@ -80,7 +80,7 @@ Link: /api/recipes/1234/languages/2341; rel="alternate"; hreflang="sv"
 {
     "id": "1234",
     "name": "Cake",
-    languageId": "1234"
+    "languageId": "1234"
 }
 ```
 
@@ -104,7 +104,7 @@ Content-Type: application/json
 {
     "id": "1234",
     "name": "Cake",
-    languageId": "2341"
+    "languageId": "2341"
 }
 ```
 
