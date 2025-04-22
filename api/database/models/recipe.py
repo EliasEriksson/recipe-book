@@ -1,10 +1,13 @@
 from __future__ import annotations
+
 from typing import *
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import relationship
+
+from sqlalchemy.orm import Mapped, relationship
+
+from api import schemas
+
 from ..constants import Cascades
 from . import base
-from api import schemas
 
 if TYPE_CHECKING:
     from .recipe_translation import RecipeTranslation

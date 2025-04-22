@@ -1,10 +1,11 @@
 from __future__ import annotations
-from typing import *
 
 from functools import cached_property
 from pathlib import Path
-from ..environment.exceptions import EnvironmentMissingVariableError
+from typing import *
+
 from ..environment import Environment
+from ..environment.exceptions import EnvironmentMissingVariableError
 from .variables import Variables
 
 if TYPE_CHECKING:

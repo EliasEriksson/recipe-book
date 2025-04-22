@@ -1,6 +1,8 @@
 from __future__ import annotations
-from typing import *
+
 from functools import cached_property
+from typing import *
+
 from ..environment import Environment
 from .variables import Variables
 

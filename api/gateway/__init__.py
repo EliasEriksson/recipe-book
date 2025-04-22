@@ -1,4 +1,5 @@
 import litestar.openapi
+
 from ..configuration import Configuration
 from .controller import Controller
 from .router import router

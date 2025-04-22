@@ -1,13 +1,13 @@
 from __future__ import annotations
-from typing import *
+
 from functools import cached_property
+from typing import *
+
 from api.shared.singleton import Singleton
-from .variables import Variables
-from . import environment
+
+from . import api, database, email, environment
 from .exceptions import ConfigurationValueError
-from . import api
-from . import database
-from . import email
+from .variables import Variables
 
 
 class Configuration(Singleton):

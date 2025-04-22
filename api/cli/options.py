@@ -1,8 +1,10 @@
-from api.configuration.variables import Variables
+from functools import reduce
+
+import click
+
 from api.configuration.api.variables import Variables as ApiVariables
 from api.configuration.database.variables import Variables as DatabaseVariables
-from functools import reduce
-import click
+from api.configuration.variables import Variables
 
 
 def configuration_api_options(command):

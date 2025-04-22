@@ -1,12 +1,14 @@
 from __future__ import annotations
-from typing import *
+
 from functools import cached_property
 from pathlib import Path
+from typing import *
+
 from alembic.config import Config as AlembicConfiguration
+
 from ..environment import Environment
 from .exceptions import AlembicMigrationsNotFound
 from .variables import Variables
-
 
 if TYPE_CHECKING:
     from ..configuration import Configuration as Parent

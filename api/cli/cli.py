@@ -1,13 +1,14 @@
+import subprocess
+import sys
+
+import click
+
 from api.configuration import Configuration
 from api.configuration.environment.types import Environment
 from api.configuration.variables import Variables
+
+from . import api, database, ui
 from .options import configuration_options
-from . import ui
-from . import database
-from . import api
-import subprocess
-import sys
-import click
 
 cli = click.Group()
 cli.add_command(api.cli)

@@ -1,6 +1,5 @@
-from datetime import datetime
-from datetime import timezone
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
+
 from babel.dates import format_datetime
 
 time = datetime.now(tz=timezone.utc) - timedelta(hours=6)

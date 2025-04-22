@@ -1,6 +1,6 @@
 import litestar
-from . import recipes
-from . import languages
+
+from . import languages, recipes
 
 router = litestar.Router(
     path="/",

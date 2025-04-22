@@ -1,7 +1,10 @@
 from __future__ import annotations
+
 from typing import *
+
 import msgspec
 from sqlalchemy.orm import Mapped
+
 from ..base import Base
 
 

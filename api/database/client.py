@@ -1,7 +1,6 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.ext.asyncio import AsyncSessionTransaction
-from .operations import Languages
-from .operations import Recipes
+from sqlalchemy.ext.asyncio import AsyncSession, AsyncSessionTransaction
+
+from .operations import Languages, Recipes
 
 
 class Client:

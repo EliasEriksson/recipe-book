@@ -1,18 +1,18 @@
 from __future__ import annotations
+
 from typing import *
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import mapped_column
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import relationship
-from sqlalchemy import String
 from uuid import UUID
-from . import base
-from ..constants import CASCADE
+
+from sqlalchemy import ForeignKey, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from ... import schemas
+from ..constants import CASCADE
+from . import base
 
 if TYPE_CHECKING:
-    from .recipe import Recipe
     from .language import Language
+    from .recipe import Recipe
 
 
 class RecipeTranslation(base.Base):

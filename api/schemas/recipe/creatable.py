@@ -1,7 +1,8 @@
 from typing import *
+from uuid import UUID
+
 import msgspec
 from sqlalchemy.orm import Mapped
-from uuid import UUID
 
 
 class CreateProtocol(Protocol):

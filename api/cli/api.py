@@ -1,9 +1,12 @@
-from api.configuration.environment.types import Environment
-from api.configuration import Configuration
-from .options import configuration_options
 from pathlib import Path
-import uvicorn
+
 import click
+import uvicorn
+
+from api.configuration import Configuration
+from api.configuration.environment.types import Environment
+
+from .options import configuration_options
 
 cli = click.Group("api")
 

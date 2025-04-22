@@ -1,8 +1,9 @@
 from __future__ import annotations
+
 import os
+
 from . import types
-from .exceptions import EnvironmentMissingVariableError
-from .exceptions import EnvironmentValueTypeError
+from .exceptions import EnvironmentMissingVariableError, EnvironmentValueTypeError
 
 
 class Environment:

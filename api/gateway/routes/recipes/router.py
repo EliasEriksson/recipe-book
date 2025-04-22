@@ -1,7 +1,7 @@
 import litestar
-from .controller import Controller
-from . import routes
 
+from . import routes
+from .controller import Controller
 
 router = litestar.Router(
     path="/recipes/",

@@ -1,9 +1,10 @@
 from __future__ import annotations
+
 from typing import *
-from .creatable import LanguageCreatable
-from .creatable import CreateProtocol
 from uuid import UUID
+
 from ..identifiable import IdentityProtocol
+from .creatable import CreateProtocol, LanguageCreatable
 
 
 class LanguageProtocol(CreateProtocol, IdentityProtocol, Protocol): ...

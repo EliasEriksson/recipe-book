@@ -1,9 +1,10 @@
 from __future__ import annotations
+
 from typing import *
-from .creatable import Creatable
-from .creatable import CreateProtocol
 from uuid import UUID
+
 from ..identifiable import IdentityProtocol
+from .creatable import Creatable, CreateProtocol
 
 
 class RecipeProtocol(CreateProtocol, IdentityProtocol, Protocol): ...

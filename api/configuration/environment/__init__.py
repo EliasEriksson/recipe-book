@@ -1,3 +1,2 @@
-from . import exceptions
+from . import exceptions, types
 from .environment import Environment
-from . import types

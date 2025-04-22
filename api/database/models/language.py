@@ -1,12 +1,14 @@
 from __future__ import annotations
+
 from typing import *
-from sqlalchemy.orm import mapped_column
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import relationship
+
 from sqlalchemy import CHAR
-from . import base
-from ..constants import Cascades
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from api import schemas
+
+from ..constants import Cascades
+from . import base
 
 if TYPE_CHECKING:
     from .recipe_translation import RecipeTranslation
