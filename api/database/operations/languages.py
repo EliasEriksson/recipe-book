@@ -5,8 +5,8 @@ from sqlalchemy import select
 from sqlalchemy import delete
 from .. import models
 from api import schemas
-from .paging import Page
-from .paging import PageResult
+from api.database.page import Page
+from api.database.page import PageResult
 from datetime import datetime
 
 
@@ -33,12 +33,17 @@ class Languages(Page):
         offset: int | None = None,
     ) -> PageResult[Result]:
         query = select(models.Language)
-        query = self.page(query, limit, offset)
         async with self._session.begin():
-            results = (await self._session.execute(query)).scalars().all()
+            results = (
+                (await self._session.execute(self.page(query, limit, offset)))
+                .scalars()
+                .all()
+            )
+            count = (await self._session.execute(self.count(query))).scalars().one()
         return PageResult(
             limit,
             offset,
+            count,
             [Result(result) for result in results],
         )
 
@@ -54,12 +59,17 @@ class Languages(Page):
             .join(models.Recipe)
             .where(models.Recipe.id == recipe_id)
         )
-        query = self.page(query, limit, offset)
         async with self._session.begin():
-            results = (await self._session.execute(query)).scalars().all()
+            results = (
+                (await self._session.execute(self.page(query, limit, offset)))
+                .scalars()
+                .all()
+            )
+            count = (await self._session.execute(self.count(query))).scalars().one()
         return PageResult(
             limit,
             offset,
+            count,
             [Result(language) for language in results],
         )
 

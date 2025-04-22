@@ -1,21 +1,34 @@
 from typing import *
 import litestar
 from litestar import Response
+from litestar import Request
+from litestar.params import Parameter
 from litestar.exceptions.http_exceptions import NotFoundException
 from litestar.exceptions.http_exceptions import ClientException
 from uuid import UUID
 from api import schemas
-from api.headers import Header
+from api.header import Header
 from api.database import Database
 
 
 class Controller(litestar.Controller):
     @litestar.get("/")
-    async def list(self) -> Response[List[schemas.Language]]:
+    async def list(
+        self,
+        request: Request,
+        limit: Annotated[int, Parameter(query="limit")] = 20,
+        offset: Annotated[int, Parameter(query="offset")] = 0,
+    ) -> Response[List[schemas.Language]]:
         async with Database() as client:
-            result = await client.languages.list()
+            result = await client.languages.list(limit, offset)
         return Response(
             [schemas.Language.create(result.language) for result in result.results],
+            headers=Header.paging_links(
+                request,
+                limit,
+                offset,
+                result.count,
+            ),
         )
 
     @litestar.get("/{id:uuid}")

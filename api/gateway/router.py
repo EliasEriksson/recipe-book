@@ -3,7 +3,7 @@ import re
 import litestar
 from litestar.params import Parameter
 from litestar.di import Provide
-from api.headers import Header
+from api.header import Header
 from . import routes
 
 pattern = re.compile(r"^\s*(\w{2})(?:-(\w{2}))?(?:\s*;\s*q\s*=\s*([\d.]+)\s*)?$")

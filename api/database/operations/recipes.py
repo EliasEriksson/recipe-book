@@ -9,8 +9,8 @@ from sqlalchemy.orm import selectinload
 from .. import models
 from api import schemas
 from .languages import Languages
-from .paging import Page
-from .paging import PageResult
+from api.database.page import Page
+from api.database.page import PageResult
 from datetime import datetime
 
 
@@ -68,15 +68,17 @@ class Recipes(Page):
         query = query.join(models.Recipe).options(
             selectinload(models.RecipeTranslation.recipe)
         )
-        query = self.page(query, limit, offset)
         async with self._session.begin():
-            translations = (await self._session.execute(query)).scalars().all()
-
+            translations = (
+                (await self._session.execute(self.page(query, limit, offset)))
+                .scalars()
+                .all()
+            )
+            count = (await self._session.execute(self.count(query))).scalars().one()
         return PageResult(
             limit,
             offset,
-            # TODO fix this 100
-            100,
+            count,
             [Result(translation.recipe, translation) for translation in translations],
         )
 

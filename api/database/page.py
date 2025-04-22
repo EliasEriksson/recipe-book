@@ -1,5 +1,8 @@
 from typing import *
+from sqlalchemy import select
 from sqlalchemy import Select
+from sqlalchemy import func
+from sqlalchemy.sql.roles import FromClauseRole
 
 
 class PageResult[T]:
@@ -32,3 +35,6 @@ class Page:
             if offset is not None:
                 query = query.offset(offset)
         return query
+    @staticmethod
+    def count[T](query: Select[T]) -> Select[Tuple[int]]:
+        return select(func.count("*")).select_from(cast(FromClauseRole, query))

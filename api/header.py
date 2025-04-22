@@ -1,5 +1,7 @@
 from typing import *
-from math import floor
+from urllib.parse import urljoin
+from litestar import Request
+from math import ceil
 from datetime import datetime
 from datetime import timezone
 from .shared.iterable import Iterable
@@ -37,31 +39,36 @@ class Header:
     @classmethod
     def paging_links(
         cls,
+        request: Request,
         limit: int,
         offset: int,
         count: int,
     ) -> Dict[str, str]:
+        url = str(request.url)
+        last = ceil(count / limit) - 1
         return {
             cls.Names.link: ", ".join(
-                (
-                    f'<?limit={limit}&offset={0}>; rel="first"',
-                    f'<?limit={limit}&offset={offset - 1}>; rel="prev"',
-                    f'<?limit={limit}&offset={offset + 1}>; rel="next"',
-                    f'<?limit={limit}&offset={floor(count / limit)}; rel="last">',
-                )
+                link for link in (
+                    f'<{urljoin(url, f"?limit={limit}&offset={0}")}> rel="first"',
+                    f'<{urljoin(url, f"?limit={limit}&offset={offset - 1}")}> rel="prev"' if offset > 0 else None,
+                    f'<{urljoin(url, f"?limit={limit}&offset={offset + 1}")}> rel="next"' if offset != last else None,
+                    f'<{urljoin(url, f"?limit={limit}&offset={last}")}> rel="last"',
+                ) if link is not None
             )
         }
 
     @classmethod
     def translations_links(
         cls,
+        request: Request,
         translatable: Translatable,
         languages: List[schemas.Language],
     ) -> Dict[str, str]:
+        url = str(request.url)
         return {
             cls.Names.link: ", ".join(
                 (
-                    f'<../{language.id}>; rel="alternate"; hreflang="{language.code}"'
+                    f'<{urljoin(url, str(language.id))}>; rel="alternate"; hreflang="{language.code}"'
                     for language in languages
                     if language.id != translatable.language_id
                 )
