@@ -12,13 +12,14 @@ from . import base
 
 if TYPE_CHECKING:
     from .language import Language
-    from .recipe import Recipe
+    from .unit import Unit
 
 
-class RecipeTranslation(base.Base):
-    __tablename__ = "recipe_translation"
-    recipe_id: Mapped[UUID] = mapped_column(
-        ForeignKey("recipe.id", ondelete=CASCADE),
+class UnitTranslation(base.Base):
+    __tablename__ = "unit_translation"
+
+    unit_id: Mapped[UUID] = mapped_column(
+        ForeignKey("unit.id", ondelete=CASCADE),
         primary_key=True,
         nullable=False,
     )
@@ -31,23 +32,30 @@ class RecipeTranslation(base.Base):
         String(),
         nullable=False,
     )
-    recipe: Mapped[Recipe] = relationship(
+    symbol: Mapped[str] = mapped_column(
+        String(),
+        nullable=False,
+    )
+
+    unit: Mapped[Unit] = relationship(
         back_populates="translations",
     )
     language: Mapped[Language] = relationship(
-        back_populates="recipe_translations",
+        back_populates="unit_translations",
     )
 
     @classmethod
-    def create(cls, recipe: Recipe, translation: schemas.recipe.CreateProtocol) -> Self:
+    def create(cls, unit: Unit, translation: schemas.unit.CreateProtocol) -> Self:
         return cls(
-            recipe_id=recipe.id,
+            unit_id=unit.id,
             language_id=translation.language_id,
             name=translation.name,
+            symbol=translation.symbol,
         )
 
-    def update(self, recipe: schemas.recipe.RecipeProtocol) -> Self:
-        self.recipe_id = recipe.id
-        self.language_id = recipe.language_id
-        self.name = recipe.name
+    def update(self, unit: schemas.unit.UnitProtocol) -> Self:
+        self.unit_id = unit.id
+        self.language_id = unit.language_id
+        self.name = unit.name
+        self.symbol = unit.symbol
         return self

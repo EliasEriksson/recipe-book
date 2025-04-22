@@ -7,16 +7,17 @@ from ..identifiable import IdentityProtocol
 from .creatable import Creatable, CreateProtocol
 
 
-class RecipeProtocol(CreateProtocol, IdentityProtocol, Protocol): ...
+class UnitProtocol(CreateProtocol, IdentityProtocol, Protocol): ...
 
 
-class Recipe(Creatable):
+class Unit(Creatable):
     id: UUID
 
     @classmethod
-    def create(cls, recipe: IdentityProtocol, translation: CreateProtocol) -> Recipe:
+    def create(cls, unit: IdentityProtocol, translation: CreateProtocol) -> Unit:
         return cls(
-            id=recipe.id,
+            id=unit.id,
             language_id=translation.language_id,
             name=translation.name,
+            symbol=translation.symbol,
         )

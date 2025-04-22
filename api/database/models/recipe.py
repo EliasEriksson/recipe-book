@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 class Recipe(base.Identifiable):
     __tablename__ = "recipe"
-    translations: Mapped[list[RecipeTranslation]] = relationship(
+    translations: Mapped[List[RecipeTranslation]] = relationship(
         back_populates="recipe",
         cascade=Cascades.default(),
     )
@@ -24,6 +24,6 @@ class Recipe(base.Identifiable):
     def create(cls, _: schemas.recipe.CreateProtocol) -> Recipe:
         return cls()
 
-    def update(self, recipe: schemas.recipe.RecipeProtocol) -> Recipe:
+    def update(self, recipe: schemas.recipe.RecipeProtocol) -> Self:
         self.id = recipe.id
         return self
