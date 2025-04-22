@@ -2,6 +2,7 @@ from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import delete, desc, func, select
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -99,13 +100,15 @@ class Recipes:
 
     async def update(self, id: UUID, data: schemas.recipe.RecipeProtocol) -> Result:
         query = (
-            select(models.Recipe, models.RecipeTranslation)
+            select(models.Recipe)
             .join(models.RecipeTranslation)
             .where(models.Recipe.id == id)
             .options(selectinload(models.Recipe.translations))
         )
         async with self._session.begin():
-            recipe = (await self._session.execute(query)).scalars().one()
+            recipe = (await self._session.execute(query)).scalars().first()
+            if recipe is None:
+                raise NoResultFound("No row was found when one was required")
             for translation in recipe.translations:
                 if translation.language_id == data.language_id:
                     translation.update(data)

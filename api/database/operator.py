@@ -1,6 +1,7 @@
 from typing import *
 
 from sqlalchemy import Delete, Select, func, select
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.roles import FromClauseRole
 
@@ -36,8 +37,10 @@ class Operator:
         transformer: Callable[[T], TResult],
     ) -> TResult:
         async with self._session.begin():
-            result = await self._session.execute(query)
-        return transformer(result.scalars().one())
+            result = (await self._session.execute(query)).scalars().first()
+        if result is None:
+            raise NoResultFound("No row was found when one was required")
+        return transformer(result)
 
     async def delete[T](self, query: Delete[T]) -> bool:
         async with self._session.begin():
