@@ -21,7 +21,7 @@ Lists recipies in the users most preferred language.
 * If query parameter `language` is set to the string value `original` the list will recipies with their original language.
   This means that the list may include recipies with mixed languages
 * Possible paging is found in the `Link` header. `rel="prev"` and `rel="next""` are only provided if they are relevant.
-* (`Link` header in this example is multi-lined for readability. In reality its one single line.)
+
 ```http request
 GET /api/recipes HTTP/1.1
 Accept-Language: sv, en-gb;q=0.8, en;q=0.7
@@ -29,10 +29,7 @@ Accept-Language: sv, en-gb;q=0.8, en;q=0.7
 ```http response
 HTTP/1.1 200 OK
 Content-Type: application/json
-Link: <https://example.com/api/recipes?limit=10&offset=0>; rel="first", 
-      <https://example.com/api/recipes?limit=10&offset=3>; rel="next",
-      <https://example.com/api/recipes?limit=10&offset=3>; rel="next",
-      <https://example.com/api/recipes?limit=10&offset=4>; rel="last"'
+Link: <https://example.com/api/recipes?limit=10&offset=0>; rel="first", <https://example.com/api/recipes?limit=10&offset=3>; rel="next", <https://example.com/api/recipes?limit=10&offset=3>; rel="next", <https://example.com/api/recipes?limit=10&offset=4>; rel="last"'
 
 [
     {
@@ -51,10 +48,8 @@ Accept-Language: sv, en-gb;q=0.8, en;q=0.7
 ```http response
 HTTP/1.1 200 OK
 Content-Type: application/json
-Link: <https://example.com/api/recipes/1234/languages?limit=10&offset=0>; rel="first", 
-      <https://example.com/api/recipes/1234/languages?limit=10&offset=3>; rel="next",
-      <https://example.com/api/recipes/1234/languages?limit=10&offset=3>; rel="next",
-      <https://example.com/api/recipes/1234/languages?limit=10&offset=4>; rel="last"'
+Link: <https://example.com/api/recipes/1234/languages?limit=10&offset=0>; rel="first", <https://example.com/api/recipes/1234/languages?limit=10&offset=3>; rel="next", <https://example.com/api/recipes/1234/languages?limit=10&offset=3>; rel="next", <https://example.com/api/recipes/1234/languages?limit=10&offset=4>; rel="last"'
+
 [
     {
         "id": "1234",
