@@ -77,7 +77,7 @@ class Recipes:
             offset,
         )
 
-    async def fetch_by_id(self, id: UUID, language_id: UUID) -> Result | None:
+    async def fetch_by_id(self, id: UUID, language_id: UUID) -> Result:
         query = (
             select(models.RecipeTranslation)
             .where(models.RecipeTranslation.language_id == language_id)

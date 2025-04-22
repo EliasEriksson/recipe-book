@@ -30,6 +30,21 @@ class Controller(litestar.Controller):
             headers=Header.paging_links(request, limit, offset, result.count),
         )
 
+    @litestar.get("/{id:uuid}/languages")
+    async def list_languages(
+        self,
+        request: Request,
+        id: UUID,
+        limit: Annotated[int, Parameter(query="limit")] = 20,
+        offset: Annotated[int, Parameter(query="offset")] = 0,
+    ) -> Response[List[schemas.Language]]:
+        async with Database() as client:
+            result = await client.languages.list_by_recipe(id, limit, offset)
+        return Response(
+            [schemas.Language.create(result.language) for result in result.results],
+            headers=Header.paging_links(request, limit, offset, result.count),
+        )
+
     @litestar.get("/{id:uuid}/languages/{language_id:uuid}")
     async def fetch(
         self,

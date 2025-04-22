@@ -12,6 +12,7 @@ from . import base
 
 if TYPE_CHECKING:
     from .recipe_translation import RecipeTranslation
+    from .unit_translations import UnitTranslation
 
 
 class CreateProtocol(Protocol):
@@ -25,7 +26,11 @@ class Language(base.Identifiable):
         unique=True,
         nullable=False,
     )
-    recipe_translations: Mapped[list[RecipeTranslation]] = relationship(
+    recipe_translations: Mapped[List[RecipeTranslation]] = relationship(
+        back_populates="language",
+        cascade=Cascades.default(),
+    )
+    unit_translations: Mapped[List[UnitTranslation]] = relationship(
         back_populates="language",
         cascade=Cascades.default(),
     )

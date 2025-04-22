@@ -20,7 +20,7 @@ Lists recipies in the users most preferred language.
 * If query parameter `language` is defined it will override the header if present.
 * If query parameter `language` is set to the string value `original` the list will recipies with their original language.
   This means that the list may include recipies with mixed languages
-* Possible paging is found in the `Link` header. `rel="prev"` and `rel="next""` are only provided if they are relevant.
+* Possible paging is found in the `Link` header. `rel="prev"` and `rel="next"` are only provided if they are relevant.
 
 ```http request
 GET /api/recipes HTTP/1.1
