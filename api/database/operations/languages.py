@@ -73,11 +73,11 @@ class Languages(Page):
             [Result(language) for language in results],
         )
 
-    async def fetch_by_id(self, id: UUID) -> Result | None:
+    async def fetch_by_id(self, id: UUID) -> Result:
         query = select(models.Language).where(models.Language.id == id)
         async with self._session.begin():
-            result = (await self._session.execute(query)).scalars().one_or_none()
-        return Result(result) if result else None
+            result = (await self._session.execute(query)).scalars().one()
+        return Result(result)
 
     async def create(self, language: schemas.language.CreateProtocol) -> Result:
         result = models.Language.create(language)
