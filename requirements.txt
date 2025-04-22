@@ -10,6 +10,7 @@ h11==0.14.0
 httpcore==1.0.8
 httpx==0.28.1
 idna==3.10
+isort==6.0.1
 litestar==2.15.2
 litestar-htmx==0.4.1
 Mako==1.3.10

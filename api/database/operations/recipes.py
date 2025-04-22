@@ -1,17 +1,16 @@
-from typing import *
-from uuid import UUID
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from sqlalchemy import delete
-from sqlalchemy import func
-from sqlalchemy import desc
-from sqlalchemy.orm import selectinload
-from .. import models
-from api import schemas
-from .languages import Languages
-from api.database.page import Page
-from api.database.page import PageResult
 from datetime import datetime
+from uuid import UUID
+
+from sqlalchemy import delete, desc, func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
+from api import schemas
+from api.database.page_result import PageResult
+
+from .. import models
+from ..operator import Operator
+from .languages import Languages
 
 
 class Result:
@@ -33,12 +32,14 @@ class Result:
         )
 
 
-class Recipes(Page):
+class Recipes:
     _session: AsyncSession
     _languages: Languages
+    _operator: Operator
 
     def __init__(self, session: AsyncSession, languages: Languages) -> None:
         self._session = session
+        self._operator = Operator(session)
         self._languages = languages
 
     async def list(
@@ -68,18 +69,11 @@ class Recipes(Page):
         query = query.join(models.Recipe).options(
             selectinload(models.RecipeTranslation.recipe)
         )
-        async with self._session.begin():
-            translations = (
-                (await self._session.execute(self.page(query, limit, offset)))
-                .scalars()
-                .all()
-            )
-            count = (await self._session.execute(self.count(query))).scalars().one()
-        return PageResult(
+        return await self._operator.list(
+            query,
+            lambda result: Result(result.recipe, result),
             limit,
             offset,
-            count,
-            [Result(translation.recipe, translation) for translation in translations],
         )
 
     async def fetch_by_id(self, id: UUID, language_id: UUID) -> Result | None:
@@ -90,9 +84,9 @@ class Recipes(Page):
             .join(models.Recipe)
             .options(selectinload(models.RecipeTranslation.recipe))
         )
-        async with self._session.begin():
-            translation = (await self._session.execute(query)).scalars().one()
-        return Result(translation.recipe, translation)
+        return await self._operator.fetch(
+            query, lambda result: Result(result.recipe, result)
+        )
 
     async def create(self, creatable: schemas.recipe.CreateProtocol) -> Result:
         async with self._session.begin():
@@ -125,9 +119,7 @@ class Recipes(Page):
 
     async def delete(self, id: UUID) -> bool:
         query = delete(models.Recipe).where(models.Recipe.id == id)
-        async with self._session.begin():
-            result = await self._session.execute(query)
-        return cast(int, result.rowcount) > 0
+        return await self._operator.delete(query)
 
     async def delete_translation(self, id: UUID, language_id: UUID) -> bool:
         query = (
@@ -135,6 +127,4 @@ class Recipes(Page):
             .where(models.RecipeTranslation.recipe_id == id)
             .where(models.RecipeTranslation.language_id == language_id)
         )
-        async with self._session.begin():
-            result = await self._session.execute(query)
-        return cast(int, result.rowcount) > 0
+        return await self._operator.delete(query)

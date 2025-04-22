@@ -48,12 +48,22 @@ class Header:
         last = ceil(count / limit) - 1
         return {
             cls.Names.link: ", ".join(
-                link for link in (
+                link
+                for link in (
                     f'<{urljoin(url, f"?limit={limit}&offset={0}")}> rel="first"',
-                    f'<{urljoin(url, f"?limit={limit}&offset={offset - 1}")}> rel="prev"' if offset > 0 else None,
-                    f'<{urljoin(url, f"?limit={limit}&offset={offset + 1}")}> rel="next"' if offset != last else None,
+                    (
+                        f'<{urljoin(url, f"?limit={limit}&offset={offset - 1}")}> rel="prev"'
+                        if offset > 0
+                        else None
+                    ),
+                    (
+                        f'<{urljoin(url, f"?limit={limit}&offset={offset + 1}")}> rel="next"'
+                        if offset != last
+                        else None
+                    ),
                     f'<{urljoin(url, f"?limit={limit}&offset={last}")}> rel="last"',
-                ) if link is not None
+                )
+                if link is not None
             )
         }
 
