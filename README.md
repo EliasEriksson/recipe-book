@@ -13,11 +13,13 @@
 
 ## Request response examples for endpoints
 ### Recipe or any translatable resource
+This is examples requests of the recipe resource but any translatable resource will look roughly the same.
+For available endpoints and body schemas visit `/api`.
 #### List
 Lists recipies in the users most preferred language.
-If query parameter `language` is defined it will override the header if present.
-If query parameter `language` is set to the string value `original` the list will recipies with their original language.
-This means that the list may include recipies with mixed languages
+* If query parameter `language` is defined it will override the header if present.
+* If query parameter `language` is set to the string value `original` the list will recipies with their original language.
+  This means that the list may include recipies with mixed languages
 ```http request
 GET /api/recipes HTTP/1.1
 Accept-Language: sv, en-gb;q=0.8, en;q=0.7
