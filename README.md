@@ -116,7 +116,7 @@ Accept-Language: sv, en-gb;q=0.8, en;q=0.7
 Content-Type: application/json
 
 {
-    "id": "1234,
+    "id": "1234",
     "name": "Cake",
     "languageId": "1234"
 }
@@ -128,7 +128,7 @@ Content-Type: application/json
 Link: /api/recipes/1234/languages/2341; rel="alternate"; hreflang="sv"
 
 {
-    "id": "1234,
+    "id": "1234",
     "name": "Cake",
     "languageId": "1234"
 }
