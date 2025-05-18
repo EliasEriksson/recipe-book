@@ -12,7 +12,12 @@ from api.header import Header
 
 
 class Controller(litestar.Controller):
-    @litestar.get("/")
+    description = "Delete all data related to this recipe. "
+
+    @litestar.get(
+        "/",
+        summary="List all available languages.",
+    )
     async def list(
         self,
         request: Request,
@@ -31,7 +36,10 @@ class Controller(litestar.Controller):
             ),
         )
 
-    @litestar.get("/{id:uuid}")
+    @litestar.get(
+        "/{id:uuid}",
+        summary="Fetch a specified language.",
+    )
     async def fetch(self, id: UUID) -> Response[schemas.Language]:
         async with Database() as client:
             result = await client.languages.fetch_by_id(id)
@@ -42,7 +50,10 @@ class Controller(litestar.Controller):
             headers=Header.last_modified(result.modified),
         )
 
-    @litestar.post("/")
+    @litestar.post(
+        "/",
+        summary="Create a new language.",
+    )
     async def create(
         self, data: schemas.language.LanguageCreatable
     ) -> Response[schemas.Language]:
@@ -53,7 +64,10 @@ class Controller(litestar.Controller):
             headers=Header.last_modified(result.modified),
         )
 
-    @litestar.put("/{id:uuid}")
+    @litestar.put(
+        "/{id:uuid}",
+        summary="Update a specified language.",
+    )
     async def update(
         self, id: UUID, data: schemas.language.Language
     ) -> Response[schemas.Language]:
@@ -66,7 +80,11 @@ class Controller(litestar.Controller):
             headers=Header.last_modified(result.modified),
         )
 
-    @litestar.delete("/{id:uuid}")
+    @litestar.delete(
+        "/{id:uuid}",
+        summary="Delete the specified language.",
+        description="Will delete all data that uses this language.",
+    )
     async def delete(self, id: UUID) -> None:
         async with Database() as client:
             result = await client.languages.delete(id)
