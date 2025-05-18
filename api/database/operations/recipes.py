@@ -1,10 +1,10 @@
 from datetime import datetime
+from typing import *
 from uuid import UUID
 
-from sqlalchemy import delete, desc, func, select
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy import ColumnElement, delete, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import QueryableAttribute, aliased, selectinload
 
 from api import schemas
 from api.database.page_result import PageResult
@@ -33,15 +33,14 @@ class Result:
         )
 
 
+# noinspection DuplicatedCode
 class Recipes:
     _session: AsyncSession
-    _languages: Languages
     _operator: Operator
 
-    def __init__(self, session: AsyncSession, languages: Languages) -> None:
+    def __init__(self, session: AsyncSession) -> None:
         self._session = session
         self._operator = Operator(session)
-        self._languages = languages
 
     async def list(
         self,
@@ -50,15 +49,24 @@ class Recipes:
         offset: int | None = None,
     ) -> PageResult[Result]:
         if language_code is None:
-            query = (
+            translation = aliased(
+                models.RecipeTranslation,
                 select(
-                    models.RecipeTranslation, func.min(models.RecipeTranslation.created)
+                    models.RecipeTranslation,
+                    func.min(models.RecipeTranslation.created),
                 )
                 .distinct(models.RecipeTranslation.recipe_id)
                 .group_by(
                     models.RecipeTranslation.recipe_id,
                     models.RecipeTranslation.language_id,
                 )
+                .subquery("translation"),
+                flat=True,
+            )
+            query = (
+                select(translation, models.Recipe)
+                .order_by(desc(cast(ColumnElement, translation.created)))
+                .options(selectinload(cast(QueryableAttribute, translation.recipe)))
             )
         else:
             query = (
@@ -66,10 +74,9 @@ class Recipes:
                 .join(models.Language)
                 .where(models.Language.code == language_code)
                 .order_by(desc(models.RecipeTranslation.created))
+                .options(selectinload(models.RecipeTranslation.recipe))
             )
-        query = query.join(models.Recipe).options(
-            selectinload(models.RecipeTranslation.recipe)
-        )
+        query = query.join(models.Recipe)
         return await self._operator.list(
             query,
             lambda result: Result(result.recipe, result),
@@ -80,8 +87,8 @@ class Recipes:
     async def fetch_by_id(self, id: UUID, language_id: UUID) -> Result:
         query = (
             select(models.RecipeTranslation)
-            .where(models.RecipeTranslation.language_id == language_id)
             .where(models.RecipeTranslation.recipe_id == id)
+            .where(models.RecipeTranslation.language_id == language_id)
             .join(models.Recipe)
             .options(selectinload(models.RecipeTranslation.recipe))
         )
@@ -89,12 +96,12 @@ class Recipes:
             query, lambda result: Result(result.recipe, result)
         )
 
-    async def create(self, creatable: schemas.recipe.CreateProtocol) -> Result:
+    async def create(self, data: schemas.recipe.CreateProtocol) -> Result:
         async with self._session.begin():
-            recipe = models.Recipe.create(creatable)
+            recipe = models.Recipe.create(data)
             self._session.add(recipe)
             await self._session.flush()
-            translation = models.RecipeTranslation.create(recipe, creatable)
+            translation = models.RecipeTranslation.create(recipe, data)
             self._session.add(translation)
         return Result(recipe, translation)
 
@@ -106,9 +113,7 @@ class Recipes:
             .options(selectinload(models.Recipe.translations))
         )
         async with self._session.begin():
-            recipe = (await self._session.execute(query)).scalars().first()
-            if recipe is None:
-                raise NoResultFound("No row was found when one was required")
+            recipe = await self._operator.execute_scalars_first(self._session, query)
             for translation in recipe.translations:
                 if translation.language_id == data.language_id:
                     translation.update(data)

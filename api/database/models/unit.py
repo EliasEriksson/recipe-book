@@ -24,6 +24,6 @@ class Unit(base.Identifiable):
     def create(cls, _: schemas.unit.CreateProtocol) -> Unit:
         return cls()
 
-    def update(self, recipe: schemas.unit.UnitProtocol) -> Self:
-        self.id = recipe.id
+    def update(self, unit: schemas.unit.UnitProtocol) -> Self:
+        self.id = unit.id
         return self
