@@ -1,4 +1,3 @@
-import asyncio
 from typing import *
 from uuid import UUID
 
@@ -54,10 +53,8 @@ class Controller(litestar.Controller):
         language_id: UUID,
     ) -> Response[schemas.Unit]:
         async with Database() as client:
-            result, language_result = await asyncio.gather(
-                client.units.fetch_by_id(id, language_id),
-                client.languages.list_by_unit(id),
-            )
+            result = await client.units.fetch_by_id(id, language_id)
+            language_result = await client.languages.list_by_unit(id)
         if not result:
             raise NotFoundException()
         return Response(
@@ -71,7 +68,7 @@ class Controller(litestar.Controller):
         )
 
     @litestar.post("/")
-    async def create(self, data: schemas.unit.Creatable) -> Response[schemas.Unit]:
+    async def create(self, data: schemas.unit.UnitCreatable) -> Response[schemas.Unit]:
         async with Database() as client:
             result = await client.units.create(data)
         return Response(
@@ -95,7 +92,7 @@ class Controller(litestar.Controller):
             headers=Header.last_modified(result.modified),
         )
 
-    @litestar.delete("/{id:uuid")
+    @litestar.delete("/{id:uuid}")
     async def delete(self, id: UUID) -> Response[None]:
         async with Database() as client:
             result = await client.units.delete(id)

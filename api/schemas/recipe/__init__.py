@@ -1,2 +1,2 @@
-from .creatable import Creatable, CreateProtocol
+from .creatable import CreateProtocol, RecipeCreatable
 from .recipe import Recipe, RecipeProtocol

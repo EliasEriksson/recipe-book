@@ -6,7 +6,7 @@ router = litestar.Router(
     path="/",
     route_handlers=[
         recipes.router,
-        languages.router,
         units.router,
+        languages.router,
     ],
 )

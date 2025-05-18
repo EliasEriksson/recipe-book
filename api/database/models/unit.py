@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from typing import *
 
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy import String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from api import schemas
 
@@ -15,15 +16,23 @@ if TYPE_CHECKING:
 
 class Unit(base.Identifiable):
     __tablename__ = "unit"
+
+    symbol: Mapped[str] = mapped_column(
+        String(),
+        nullable=False,
+        unique=True,
+    )
+
     translations: Mapped[List[UnitTranslation]] = relationship(
         back_populates="unit",
         cascade=Cascades.default(),
     )
 
     @classmethod
-    def create(cls, _: schemas.unit.CreateProtocol) -> Unit:
-        return cls()
+    def create(cls, unit: schemas.unit.CreateProtocol) -> Unit:
+        return cls(symbol=unit.symbol)
 
     def update(self, unit: schemas.unit.UnitProtocol) -> Self:
         self.id = unit.id
+        self.symbol = unit.symbol
         return self

@@ -5,11 +5,19 @@ import msgspec
 from sqlalchemy.orm import Mapped
 
 
-class CreateProtocol(Protocol):
+class SharedRecipeCreatableProtocol(Protocol): ...
+
+
+class TranslatedRecipeCreatableProtocol(Protocol):
     language_id: UUID | Mapped[UUID]
     name: str | Mapped[str]
 
 
-class Creatable(msgspec.Struct):
+class CreateProtocol(
+    SharedRecipeCreatableProtocol, TranslatedRecipeCreatableProtocol, Protocol
+): ...
+
+
+class RecipeCreatable(msgspec.Struct):
     language_id: UUID
     name: str

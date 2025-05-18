@@ -1,2 +1,2 @@
-from .creatable import Creatable, CreateProtocol
+from .creatable import CreateProtocol, UnitCreatable
 from .unit import Unit, UnitProtocol

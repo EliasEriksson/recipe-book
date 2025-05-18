@@ -5,7 +5,7 @@ from .controller import Controller
 
 router = litestar.Router(
     path="/units/",
-    tags=["units"],
+    tags=["Units"],
     route_handlers=[
         Controller,
         routes.router,

@@ -12,7 +12,7 @@ gateway = litestar.Litestar(
     openapi_config=litestar.openapi.OpenAPIConfig(
         title="Recipe book",
         version="0.0.0",
-        root_schema_site="rapidoc",
+        root_schema_site="swagger",
         openapi_controller=Controller,
     ),
     debug=configuration.mode != "prod",

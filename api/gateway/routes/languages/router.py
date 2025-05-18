@@ -4,7 +4,7 @@ from .controller import Controller
 
 router = litestar.Router(
     path="/languages/",
-    tags=["languages"],
+    tags=["Languages"],
     route_handlers=[
         Controller,
     ],

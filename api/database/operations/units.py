@@ -11,7 +11,6 @@ from api.database.page_result import PageResult
 
 from .. import models
 from ..operator import Operator
-from .languages import Languages
 
 
 class Result:
@@ -111,7 +110,7 @@ class Units:
             .options(selectinload(models.Unit.translations))
         )
         async with self._session.begin():
-            unit = await self._operator.execute_scalars_first(query)
+            unit = await self._operator.execute_scalars_first(self._session, query)
             for translation in unit.translations:
                 if translation.language_id == data.language_id:
                     translation.update(data)

@@ -32,10 +32,6 @@ class UnitTranslation(base.Base):
         String(),
         nullable=False,
     )
-    symbol: Mapped[str] = mapped_column(
-        String(),
-        nullable=False,
-    )
 
     unit: Mapped[Unit] = relationship(
         back_populates="translations",
@@ -50,12 +46,10 @@ class UnitTranslation(base.Base):
             unit_id=unit.id,
             language_id=translation.language_id,
             name=translation.name,
-            symbol=translation.symbol,
         )
 
     def update(self, unit: schemas.unit.UnitProtocol) -> Self:
         self.unit_id = unit.id
         self.language_id = unit.language_id
         self.name = unit.name
-        self.symbol = unit.symbol
         return self

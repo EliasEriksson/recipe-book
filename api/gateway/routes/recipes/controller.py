@@ -68,7 +68,9 @@ class Controller(litestar.Controller):
         )
 
     @litestar.post("/")
-    async def create(self, data: schemas.recipe.Creatable) -> Response[schemas.Recipe]:
+    async def create(
+        self, data: schemas.recipe.RecipeCreatable
+    ) -> Response[schemas.Recipe]:
         async with Database() as client:
             result = await client.recipes.create(data)
         return Response(
