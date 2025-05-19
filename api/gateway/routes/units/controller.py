@@ -145,5 +145,7 @@ class Controller(litestar.Controller):
         async with Database() as client:
             result = await client.units.delete_translation(id, language_id)
         if not result:
-            raise NotFoundException()
+            raise ClientException(
+                "Unit either does not exist or was not deleted due to it being the only translation."
+            )
         return Response(None)

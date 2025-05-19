@@ -147,5 +147,7 @@ class Controller(litestar.Controller):
         async with Database() as client:
             result = await client.recipes.delete_translation(id, language_id)
         if not result:
-            raise NotFoundException()
+            raise ClientException(
+                "Recipe either does not exist or was not deleted due to it being the only translation."
+            )
         return Response(None)

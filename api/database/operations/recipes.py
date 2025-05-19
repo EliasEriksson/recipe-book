@@ -130,10 +130,16 @@ class Recipes:
         return await self._operator.delete(query)
 
     async def delete_translation(self, id: UUID, language_id: UUID) -> bool:
-        # TODO update this query to only delete if there is more than one language
         query = (
             delete(models.RecipeTranslation)
-            .where(models.RecipeTranslation.recipe_id == id)
             .where(models.RecipeTranslation.language_id == language_id)
+            .where(
+                models.RecipeTranslation.recipe_id
+                == select(models.RecipeTranslation.recipe_id)
+                .where(models.RecipeTranslation.recipe_id == id)
+                .group_by(models.RecipeTranslation.recipe_id)
+                .having(func.count("*") > 1)
+                .scalar_subquery()
+            )
         )
         return await self._operator.delete(query)
