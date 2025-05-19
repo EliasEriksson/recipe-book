@@ -9,10 +9,12 @@ from api import schemas
 
 from ..constants import Cascades
 from . import base
+from ...schemas.ingredient import IngredientProtocol
 
 if TYPE_CHECKING:
     from .recipe_translation import RecipeTranslation
     from .unit_translations import UnitTranslation
+    from .ingredient_translation import IngredientTranslation
 
 
 class CreateProtocol(Protocol):
@@ -31,6 +33,10 @@ class Language(base.Identifiable):
         cascade=Cascades.default(),
     )
     unit_translations: Mapped[List[UnitTranslation]] = relationship(
+        back_populates="language",
+        cascade=Cascades.default(),
+    )
+    ingredient_translations: Mapped[List[IngredientTranslation]] = relationship(
         back_populates="language",
         cascade=Cascades.default(),
     )

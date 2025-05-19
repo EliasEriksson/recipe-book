@@ -29,7 +29,7 @@ class Recipe(RecipeCreatable):
     @classmethod
     def create(
         cls, recipe: SharedRecipeProtocol, translation: TranslatedRecipeProtocol
-    ) -> Recipe:
+    ) -> Self:
         return cls(
             id=recipe.id,
             language_id=translation.language_id,

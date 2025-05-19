@@ -27,7 +27,7 @@ class Unit(UnitCreatable):
     @classmethod
     def create(
         cls, unit: SharedUnitProtocol, translation: TranslatedUnitProtocol
-    ) -> Unit:
+    ) -> Self:
         return cls(
             id=unit.id,
             symbol=unit.symbol,

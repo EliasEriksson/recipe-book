@@ -21,7 +21,7 @@ class Recipe(base.Identifiable):
     )
 
     @classmethod
-    def create(cls, _: schemas.recipe.CreateProtocol) -> Recipe:
+    def create(cls, _: schemas.recipe.CreateProtocol) -> Self:
         return cls()
 
     def update(self, recipe: schemas.recipe.RecipeProtocol) -> Self:

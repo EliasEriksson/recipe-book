@@ -14,7 +14,7 @@ class Language(LanguageCreatable):
     id: UUID
 
     @classmethod
-    def create(cls, language: LanguageProtocol) -> Language:
+    def create(cls, language: LanguageProtocol) -> Self:
         return cls(
             id=language.id,
             code=language.code,

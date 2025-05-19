@@ -127,10 +127,16 @@ class Units:
         return await self._operator.delete(query)
 
     async def delete_translation(self, id: UUID, language_id: UUID) -> bool:
-        # TODO update this query to only delete if there is more than one language
         query = (
             delete(models.UnitTranslation)
-            .where(models.UnitTranslation.unit_id == id)
             .where(models.UnitTranslation.language_id == language_id)
+            .where(
+                models.UnitTranslation.unit_id
+                == select(models.UnitTranslation.unit_id)
+                .where(models.UnitTranslation.unit_id == id)
+                .group_by(models.UnitTranslation.unit_id)
+                .having(func.count("*") > 1)
+                .scalar_subquery()
+            )
         )
         return await self._operator.delete(query)
