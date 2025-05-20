@@ -11,7 +11,6 @@ from api.database.page_result import PageResult
 
 from .. import models
 from ..operator import Operator
-from .languages import Languages
 
 
 class Result:
@@ -78,10 +77,7 @@ class Recipes:
             )
         query = query.join(models.Recipe)
         return await self._operator.list(
-            query,
-            lambda result: Result(result.recipe, result),
-            limit,
-            offset,
+            query, lambda result: Result(result.recipe, result), limit, offset
         )
 
     async def fetch_by_id(self, id: UUID, language_id: UUID) -> Result:
