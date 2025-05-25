@@ -24,7 +24,7 @@ class Result:
         self.translation = translation
 
     @property
-    def modifier(self) -> datetime:
+    def modified(self) -> datetime:
         return (
             self.ingredient.modified
             if self.ingredient.modified > self.translation.modified

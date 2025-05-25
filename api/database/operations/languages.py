@@ -72,6 +72,22 @@ class Languages:
             query, lambda result: Result(result), limit, offset
         )
 
+    async def list_by_ingredient(
+        self,
+        ingredient_id: UUID,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> PageResult[Result]:
+        query = (
+            select(models.Language)
+            .join(models.IngredientTranslation)
+            .join(models.Ingredient)
+            .where(models.Ingredient.id == ingredient_id)
+        )
+        return await self._operator.list(
+            query, lambda result: Result(result), limit, offset
+        )
+
     async def fetch_by_id(self, id: UUID) -> Result:
         query = select(models.Language).where(models.Language.id == id)
         return await self._operator.fetch(query, lambda result: Result(result))
