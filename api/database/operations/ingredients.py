@@ -57,7 +57,7 @@ class Ingredients:
                 .distinct(models.IngredientTranslation.ingredient_id)
                 .group_by(
                     models.IngredientTranslation.ingredient_id,
-                    models.IngredientTranslation.ingredient_id,
+                    models.IngredientTranslation.language_id,
                 )
                 .subquery("translation"),
                 flat=True,
