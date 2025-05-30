@@ -3,11 +3,12 @@ import asyncio
 import click
 from alembic import command
 
+from api.cli.options import configuration_options
 from api.configuration import Configuration
 from api.configuration.environment.types import Environment
 from api.database import Database
 
-from .options import configuration_options
+from .seed import seed_database
 
 cli = click.Group("database")
 
@@ -29,6 +30,13 @@ def delete(**environment: Environment) -> None:
         print("Database deleted.")
     else:
         print("Aborted.")
+
+
+@cli.command()
+@configuration_options
+def seed(**environment: Environment) -> None:
+    Configuration(cli=environment)
+    asyncio.run(seed_database())
 
 
 @cli.command()
