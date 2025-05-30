@@ -13,9 +13,7 @@
 
 ## Todo
 * `/api/resource/:resourceId/languages` should either give a list of resources in all the languages or id should be renamed to language_id
-* add languageid to main resourses as a foreign key to languages. if translation and resource point to same language it's considered the original language.
-* update fetch and list query to use a join on original language instead of an aggregation on created column
-* add put on main resource without having to specify language id in URL. this should update the translation of the original language.
+* resources `unit` and `ingredient` should have a slug that prevents duplication in their own language. This is generated from the name for the ingredient and symbol for the unit
 
 ## Request response examples for endpoints
 ### Recipe or any translatable resource

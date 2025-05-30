@@ -59,7 +59,7 @@ class Ingredients:
                     models.IngredientTranslation.ingredient_id,
                     models.IngredientTranslation.language_id,
                 )
-                .subquery("translation"),
+                .subquery("ingredient_translation"),
                 flat=True,
             )
             query = (

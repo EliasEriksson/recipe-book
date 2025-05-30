@@ -57,7 +57,7 @@ class Units:
                     models.UnitTranslation.unit_id,
                     models.UnitTranslation.language_id,
                 )
-                .subquery("translation"),
+                .subquery("unit_translation"),
                 flat=True,
             )
             query = (
