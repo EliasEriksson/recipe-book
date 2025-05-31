@@ -46,6 +46,7 @@ class Database:
         diffs = await asyncio.to_thread(
             lambda: compare_metadata(context, models.base.Base.metadata)
         )
+        await asyncio.to_thread(lambda: engine.dispose())
         return len(diffs) == 0
 
     async def delete(self) -> None:
