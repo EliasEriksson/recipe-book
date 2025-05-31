@@ -1,7 +1,6 @@
 # Recipe book
 
 ## python packages
-
 * uvicorn
 * litestar
 * SQLAlchemy
@@ -11,8 +10,47 @@
 * click
 * Babel
 
+## Setup
+### Install non python dependencies
+* [postgresql](https://www.postgresql.org/download/)
+* `apt install python3.x-dev`\
+  `x` is your python 3 minor version
+* `apt install build-essential cargo`
+
+### Install python dependencies
+1. `python3 -m venv venv`
+2. `source venv/bin/activate`
+3. `python -m pip install -r requirements.txt`
+
+### Configure postgres user
+create the recipe-book user and database
+
+```sql
+CREATE
+DATABASE "recipe-book";
+CREATE
+DATABASE "recipe-book-test";
+-- OBS! Do not use this password for anything other than local development!
+CREATE
+USER "recipe-book" WITH ENCRYPTED PASSWORD 'recipe-book';
+GRANT ALL PRIVILEGES ON DATABASE
+"recipe-book" to "recipe-book";
+GRANT ALL PRIVILEGES ON DATABASE
+"recipe-book-test" to "recipe-book";
+-- posgresql 15+
+ALTER DATABASE "recipe-book" OWNER TO "recipe-book";
+ALTER DATABASE "recipe-book-test" OWNER TO "recipe-book";
+```
+
+### Initialize the database
+```bash
+python main.py database migrate && python main.py database seed
+```
+
 ## Todo
-* `/api/resource/:resourceId/languages` should either give a list of resources in all the languages or id should be renamed to language_id
+* remove the call to `os.chdir(...)` in `main.py`. mave the path to the root of the project available in the configuration
+* add .github workflows to make run checks for isort and black formatting
+* `GET /api/resource/:resourceId/languages` should either give a list of resources in all the languages or id should be renamed to language_id
 * resources `unit` and `ingredient` should have a slug that prevents duplication in their own language. This is generated from the name for the ingredient and symbol for the unit
 
 ## Request response examples for endpoints
