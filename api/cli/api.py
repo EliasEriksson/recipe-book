@@ -22,6 +22,7 @@ def start(**environment: Environment) -> None:
         raise Exception(
             "Database models does not match database tables. Make a migration."
         )
+    # wsgi asgi
     uvicorn.run(
         f"{Path(__file__).parent.parent.name}.gateway:gateway",
         port=configuration.api.port,
