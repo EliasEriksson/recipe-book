@@ -34,6 +34,13 @@ def delete(**environment: Environment) -> None:
 
 @cli.command()
 @configuration_options
+def ready(**environment: Environment) -> None:
+    configuration = Configuration(cli=environment)
+    asyncio.run(Database(configuration).ready())
+
+
+@cli.command()
+@configuration_options
 def seed(**environment: Environment) -> None:
     Configuration(cli=environment)
     asyncio.run(seed_database())

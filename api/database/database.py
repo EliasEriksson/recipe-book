@@ -1,4 +1,8 @@
-from sqlalchemy import text
+import asyncio
+
+from alembic.autogenerate import compare_metadata
+from alembic.migration import MigrationContext
+from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -31,18 +35,18 @@ class Database:
             expire_on_commit=False,
         )
 
-    # TODO this ready function should compare the models against the live database
-    # async def ready(self) -> bool:
-    #     script = alembic.script.ScriptDirectory.from_config(
-    #         alembic.config.Config("alembic.ini")
-    #     )
-    #     async with self._engine.begin() as connection:
-    #         revision = await connection.run_sync(
-    #             lambda connection: alembic.runtime.migration.MigrationContext.configure(
-    #                 connection
-    #             ).get_current_revision()
-    #         )
-    #         return revision == script.get_current_head()
+    async def ready(self) -> bool:
+        engine = await asyncio.to_thread(
+            lambda: create_engine(self._configuration.database.url)
+        )
+        connection = await asyncio.to_thread(lambda: engine.connect())
+        context = await asyncio.to_thread(
+            lambda: MigrationContext.configure(connection)
+        )
+        diffs = await asyncio.to_thread(
+            lambda: compare_metadata(context, models.base.Base.metadata)
+        )
+        return len(diffs) == 0
 
     async def delete(self) -> None:
         async with self._engine.begin() as connection:
