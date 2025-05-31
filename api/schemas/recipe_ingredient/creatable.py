@@ -1,0 +1,2 @@
+class RecipeIngredientCreatable:
+    pass

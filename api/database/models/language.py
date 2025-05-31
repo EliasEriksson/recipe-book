@@ -8,20 +8,20 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from api import schemas
 
 from ..constants import Cascades
-from . import base
-from ...schemas.ingredient import IngredientProtocol
+from .base import Identifiable
 
 if TYPE_CHECKING:
+    from .ingredient_translation import IngredientTranslation
+    from .recipe_ingredient_translation import RecipeIngredientTranslation
     from .recipe_translation import RecipeTranslation
     from .unit_translations import UnitTranslation
-    from .ingredient_translation import IngredientTranslation
 
 
 class CreateProtocol(Protocol):
     code: str
 
 
-class Language(base.Identifiable):
+class Language(Identifiable):
     __tablename__ = "language"
     code: Mapped[str] = mapped_column(
         CHAR(length=2),
@@ -39,6 +39,12 @@ class Language(base.Identifiable):
     ingredient_translations: Mapped[List[IngredientTranslation]] = relationship(
         back_populates="language",
         cascade=Cascades.default(),
+    )
+    recipe_ingredient_translations: Mapped[List[RecipeIngredientTranslation]] = (
+        relationship(
+            back_populates="language",
+            cascade=Cascades.default(),
+        )
     )
 
     @classmethod

@@ -8,14 +8,19 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from api import schemas
 
 from ..constants import Cascades
-from . import base
+from .base import Identifiable
 
 if TYPE_CHECKING:
     from .ingredient_translation import IngredientTranslation
+    from .recipe_ingredient import RecipeIngredient
 
 
-class Ingredient(base.Identifiable):
+class Ingredient(Identifiable):
     __tablename__ = "ingredient"
+    recipe_ingredients: Mapped[List[RecipeIngredient]] = relationship(
+        back_populates="ingredient",
+        cascade=Cascades.default(),
+    )
     translations: Mapped[List[IngredientTranslation]] = relationship(
         back_populates="ingredient",
         cascade=Cascades.default(),

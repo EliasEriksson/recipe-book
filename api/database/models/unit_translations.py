@@ -8,14 +8,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ... import schemas
 from ..constants import CASCADE
-from . import base
+from .base import Base
 
 if TYPE_CHECKING:
     from .language import Language
     from .unit import Unit
 
 
-class UnitTranslation(base.Base):
+class UnitTranslation(Base):
     __tablename__ = "unit_translation"
 
     unit_id: Mapped[UUID] = mapped_column(

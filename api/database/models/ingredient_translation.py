@@ -8,14 +8,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ... import schemas
 from ..constants import CASCADE
-from . import base
+from .base import Base
 
 if TYPE_CHECKING:
-    from .language import Language
     from .ingredient import Ingredient
+    from .language import Language
 
 
-class IngredientTranslation(base.Base):
+class IngredientTranslation(Base):
     __tablename__ = "ingredient_translation"
     ingredient_id: Mapped[UUID] = mapped_column(
         ForeignKey("ingredient.id", ondelete=CASCADE),
