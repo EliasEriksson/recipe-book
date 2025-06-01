@@ -75,15 +75,12 @@ class RecipeIngredients:
         query = query.where(models.RecipeIngredient.recipe_id == recipe_id)
         if ingredient_id is not None:
             query = query.where(models.RecipeIngredient.ingredient_id == ingredient_id)
-        page = await self._operator.list(
+        return await self._operator.list(
             query,
             lambda result: Result(result.recipe_ingredient, result),
             limit,
             offset,
         )
-        for result in page.results:
-            print(result.shared)
-        return page
 
     async def create(self, data: schemas.recipe_ingredient.CreateProtocol) -> Result:
         async with self._session.begin():
