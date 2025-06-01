@@ -19,6 +19,7 @@ class Result(
 ): ...
 
 
+# noinspection DuplicatedCode
 class RecipeIngredients:
     _session: AsyncSession
     _operator: Operator
@@ -108,3 +109,60 @@ class RecipeIngredients:
             )
             self._session.add(translation)
         return Result(recipe_ingredient, translation)
+
+    async def update(
+        self,
+        recipe_id: UUID,
+        ingredient_id: UUID,
+        data: schemas.recipe_ingredient.RecipeIngredientProtocol,
+    ) -> Result:
+        query = (
+            select(models.RecipeIngredient)
+            .join(models.RecipeIngredient)
+            .where(models.RecipeIngredient.recipe_id == recipe_id)
+            .where(models.RecipeIngredient.ingredient_id == ingredient_id)
+            .options(contains_eager(models.RecipeIngredient.translations))
+        )
+        async with self._session.begin():
+            recipe_ingredient = await self._operator.execute_scalars_first(
+                self._session, query
+            )
+            for translation in recipe_ingredient.translations:
+                if translation.language_id == data.language_id:
+                    translation.update(data)
+                    break
+            else:
+                translation = models.RecipeIngredientTranslation.create(
+                    recipe_ingredient, data
+                )
+                self._session.add(translation)
+                recipe_ingredient.translations.append(translation)
+            recipe_ingredient.update(data)
+        return Result(recipe_ingredient, translation)
+
+    async def delete(self, recipe_id: UUID, ingredient_id: UUID) -> bool:
+        query = delete(models.RecipeIngredient).where(
+            models.RecipeIngredient.recipe_id == recipe_id
+        )
+        return await self._operator.delete(query)
+
+    async def delete_translation(
+        self, recipie_id: UUID, ingredient_id: UUID, language_id: UUID
+    ) -> bool:
+        # subquery = (
+        #     select(
+        #         (
+        #             models.RecipeIngredientTranslation.recipe_id,
+        #             models.RecipeIngredientTranslation.ingredient_id,
+        #         )
+        #     )
+        #     .where(models.RecipeIngredientTranslation.recipe_id == recipie_id)
+        #     .where(models.RecipeIngredientTranslation.ingredient_id == ingredient_id)
+        #     .group_by()
+        # )
+        # query = (
+        #     delete(models.RecipeIngredientTranslation)
+        #     .where(models.RecipeIngredientTranslation.language_id == language_id)
+        #     .where(models.RecipeIngredientTranslation)
+        # )
+        return await self._operator.delete(query)

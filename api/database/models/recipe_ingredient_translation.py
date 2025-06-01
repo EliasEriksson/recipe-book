@@ -66,3 +66,12 @@ class RecipeIngredientTranslation(Base):
             note=translation.note,
             brand_recommendation=translation.brand_recommendation,
         )
+
+    def update(
+        self, schema: schemas.recipe_ingredient.RecipeIngredientProtocol
+    ) -> Self:
+        self.recipe_id = schema.recipe_id
+        self.ingredient_id = schema.ingredient_id
+        self.language_id = schema.language_id
+        self.note = schema.note
+        self.brand_recommendation = schema.brand_recommendation
