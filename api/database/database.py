@@ -36,18 +36,20 @@ class Database:
         )
 
     async def ready(self) -> bool:
-        engine = await asyncio.to_thread(
-            lambda: create_engine(self._configuration.database.url)
-        )
-        connection = await asyncio.to_thread(lambda: engine.connect())
-        context = await asyncio.to_thread(
-            lambda: MigrationContext.configure(connection)
-        )
-        diffs = await asyncio.to_thread(
-            lambda: compare_metadata(context, models.base.Base.metadata)
-        )
-        await asyncio.to_thread(lambda: engine.dispose())
-        return len(diffs) == 0
+        try:
+            engine = await asyncio.to_thread(
+                lambda: create_engine(self._configuration.database.url)
+            )
+            connection = await asyncio.to_thread(lambda: engine.connect())
+            context = await asyncio.to_thread(
+                lambda: MigrationContext.configure(connection)
+            )
+            diffs = await asyncio.to_thread(
+                lambda: compare_metadata(context, models.base.Base.metadata)
+            )
+            return len(diffs) == 0
+        finally:
+            await asyncio.to_thread(lambda: engine.dispose())
 
     async def delete(self) -> None:
         async with self._engine.begin() as connection:

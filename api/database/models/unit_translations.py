@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import *
 from uuid import UUID
 
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ... import schemas
@@ -29,7 +29,7 @@ class UnitTranslation(Base):
         nullable=False,
     )
     name: Mapped[str] = mapped_column(
-        String(),
+        Text(),
         nullable=False,
     )
 

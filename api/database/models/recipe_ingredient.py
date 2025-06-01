@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import *
 from uuid import UUID
 
-from sqlalchemy import Double, ForeignKey, ForeignKeyConstraint
+from sqlalchemy import Double, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from api import schemas

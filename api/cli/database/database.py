@@ -36,7 +36,14 @@ def delete(**environment: Environment) -> None:
 @configuration_options
 def ready(**environment: Environment) -> None:
     configuration = Configuration(cli=environment)
-    asyncio.run(Database(configuration).ready())
+    if asyncio.run(Database(configuration).ready()):
+        print(
+            f"Tables in the database does reflect the database models! \033[32m✓\033[0m"
+        )
+    else:
+        print(
+            f"Tables in the database does not reflect the database models. \033[31m✗\033[0m"
+        )
 
 
 @cli.command()
