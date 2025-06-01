@@ -54,3 +54,21 @@ class RecipeIngredient(Base):
         foreign_keys="[RecipeIngredientTranslation.recipe_id, RecipeIngredientTranslation.ingredient_id]",
         cascade=Cascades.default(),
     )
+
+    @classmethod
+    def create(cls, schema: schemas.RecipeIngredient) -> Self:
+        return cls(
+            recipe_id=schema.recipe_id,
+            ingredient_id=schema.ingredient_id,
+            unit_id=schema.unit_id,
+            amount=schema.amount,
+        )
+
+    def update(
+        self, recipe: schemas.recipe_ingredient.RecipeIngredientProtocol
+    ) -> Self:
+        self.recipe_id = recipe.recipe_id
+        self.ingredient_id = recipe.ingredient_id
+        self.unit_id = recipe.unit_id
+        self.amount = recipe.amount
+        return self

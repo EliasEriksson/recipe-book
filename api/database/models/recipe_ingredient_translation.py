@@ -54,3 +54,17 @@ class RecipeIngredientTranslation(Base):
     language: Mapped[Language] = relationship(
         back_populates="recipe_ingredient_translations",
     )
+
+    @classmethod
+    def create(
+        cls,
+        recipe_ingredient: RecipeIngredient,
+        translation: schemas.recipe_ingredient.CreateProtocol,
+    ) -> Self:
+        return cls(
+            recipe_id=recipe_ingredient.recipe_id,
+            ingredient_id=recipe_ingredient.ingredient_id,
+            language_id=translation.language_id,
+            note=translation.note,
+            brand_recommendation=translation.brand_recommendation,
+        )

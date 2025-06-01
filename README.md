@@ -47,11 +47,6 @@ ALTER DATABASE "recipe-book-test" OWNER TO "recipe-book";
 python main.py database migrate && python main.py database seed
 ```
 
-## Todo
-* remove the call to `os.chdir(...)` in `main.py`. mave the path to the root of the project available in the configuration
-* add .github workflows to make run checks for isort and black formatting
-* `GET /api/resource/:resourceId/languages` should either give a list of resources in all the languages or id should be renamed to language_id
-* resources `unit` and `ingredient` should have a slug that prevents duplication in their own language. This is generated from the name for the ingredient and symbol for the unit
 
 ## Request response examples for endpoints
 ### Recipe or any translatable resource
