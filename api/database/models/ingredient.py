@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from typing import *
 
-from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, relationship
 
 from api import schemas
 

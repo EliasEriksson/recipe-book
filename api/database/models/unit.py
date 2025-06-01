@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import *
 
-from sqlalchemy import String
+from sqlalchemy import Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from api import schemas
@@ -19,7 +19,7 @@ class Unit(Identifiable):
     __tablename__ = "unit"
 
     symbol: Mapped[str] = mapped_column(
-        String(),
+        Text(),
         nullable=False,
         unique=True,
     )

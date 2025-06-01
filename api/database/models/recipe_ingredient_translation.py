@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import *
 from uuid import UUID
 
-from sqlalchemy import ForeignKey, ForeignKeyConstraint, String
+from sqlalchemy import ForeignKey, ForeignKeyConstraint, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ... import schemas
@@ -40,11 +40,11 @@ class RecipeIngredientTranslation(Base):
         nullable=False,
     )
     note: Mapped[str] = mapped_column(
-        String(),
+        Text(),
         nullable=False,
     )
     brand_recommendation: Mapped[str] = mapped_column(
-        String(),
+        Text(),
         nullable=False,
     )
     recipe_ingredient: Mapped[RecipeIngredient] = relationship(
