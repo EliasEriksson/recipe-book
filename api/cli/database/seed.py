@@ -90,7 +90,7 @@ async def seed_database() -> None:
                 centiliter.unit.id,
                 5,
                 "",
-                "",
+                "Havana Club",
             )
         )
         await client.recipe_ingredients.create(

@@ -82,6 +82,22 @@ class RecipeIngredients:
             offset,
         )
 
+    async def fetch_by_id(
+        self, recipe_id: UUID, ingredient_id: UUID, language_id: UUID
+    ) -> Result:
+        query = (
+            select(models.RecipeIngredientTranslation)
+            .join(models.RecipeIngredient)
+            .where(models.RecipeIngredient.recipe_id == recipe_id)
+            .where(models.RecipeIngredient.ingredient_id == ingredient_id)
+            .options(
+                contains_eager(models.RecipeIngredientTranslation.recipe_ingredient)
+            )
+        )
+        return await self._operator.fetch(
+            query, lambda result: Result(result.recipe_ingredient, result)
+        )
+
     async def create(self, data: schemas.recipe_ingredient.CreateProtocol) -> Result:
         async with self._session.begin():
             recipe_ingredient = models.RecipeIngredient.create(data)

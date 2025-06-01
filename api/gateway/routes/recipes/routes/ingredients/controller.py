@@ -32,42 +32,14 @@ class Controller(litestar.Controller):
             ]
         )
 
-
-data = [
-    {
-        "recipe_id": "b4894e26-9bd7-491a-8668-8f0c4f781690",
-        "ingredient_id": "5ff0bfaa-d1d3-4a4c-8f22-643b9de87e93",
-        "language_id": "c7b82923-1f67-458b-bb23-780c013d461b",
-        "unit_id": "ff1575c0-bad6-4944-8946-615c601ea117",
-        "amount": 3,
-        "note": "",
-        "brand_recommendation": "",
-    },
-    {
-        "recipe_id": "b4894e26-9bd7-491a-8668-8f0c4f781690",
-        "ingredient_id": "5ff0bfaa-d1d3-4a4c-8f22-643b9de87e93",
-        "language_id": "c7b82923-1f67-458b-bb23-780c013d461b",
-        "unit_id": "ff1575c0-bad6-4944-8946-615c601ea117",
-        "amount": 3,
-        "note": "",
-        "brand_recommendation": "",
-    },
-    {
-        "recipe_id": "b4894e26-9bd7-491a-8668-8f0c4f781690",
-        "ingredient_id": "023c12ce-67af-4d44-bcd4-1a3f9a09f1f0",
-        "language_id": "c7b82923-1f67-458b-bb23-780c013d461b",
-        "unit_id": "ff1575c0-bad6-4944-8946-615c601ea117",
-        "amount": 3,
-        "note": "",
-        "brand_recommendation": "",
-    },
-    {
-        "recipe_id": "b4894e26-9bd7-491a-8668-8f0c4f781690",
-        "ingredient_id": "023c12ce-67af-4d44-bcd4-1a3f9a09f1f0",
-        "language_id": "c7b82923-1f67-458b-bb23-780c013d461b",
-        "unit_id": "ff1575c0-bad6-4944-8946-615c601ea117",
-        "amount": 3,
-        "note": "",
-        "brand_recommendation": "",
-    },
-]
+    @litestar.get("/{ingredient_id:uuid}/languages/{language_id:uuid}")
+    async def fetch(
+        self, recipe_id: UUID, ingredient_id: UUID, language_id: UUID
+    ) -> Response[schemas.RecipeIngredient]:
+        async with Database() as client:
+            result = await client.recipe_ingredients.fetch_by_id(
+                recipe_id, ingredient_id, language_id
+            )
+        return Response(
+            schemas.RecipeIngredient.create(result.shared, result.translation)
+        )
