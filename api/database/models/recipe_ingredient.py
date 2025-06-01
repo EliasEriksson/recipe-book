@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import *
 from uuid import UUID
 
-from sqlalchemy import Double, ForeignKey
+from sqlalchemy import Double, ForeignKey, ForeignKeyConstraint, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from api import schemas
@@ -23,13 +23,11 @@ class RecipeIngredient(Base):
     recipe_id: Mapped[UUID] = mapped_column(
         ForeignKey("recipe.id", ondelete=CASCADE),
         primary_key=True,
-        unique=True,
         nullable=False,
     )
     ingredient_id: Mapped[UUID] = mapped_column(
         ForeignKey("ingredient.id", ondelete=CASCADE),
         primary_key=True,
-        unique=True,
         nullable=False,
     )
     unit_id: Mapped[UUID] = mapped_column(
@@ -56,7 +54,7 @@ class RecipeIngredient(Base):
     )
 
     @classmethod
-    def create(cls, schema: schemas.RecipeIngredient) -> Self:
+    def create(cls, schema: schemas.recipe_ingredient.CreateProtocol) -> Self:
         return cls(
             recipe_id=schema.recipe_id,
             ingredient_id=schema.ingredient_id,

@@ -5,7 +5,7 @@ from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.roles import FromClauseRole
 
-from .page_result import PageResult
+from .result import PageResult
 
 
 class Operator:

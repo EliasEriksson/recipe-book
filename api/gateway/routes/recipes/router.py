@@ -7,7 +7,7 @@ router = litestar.Router(
     path="/recipes/",
     tags=["Recipes"],
     route_handlers=[
-        Controller,
         routes.router,
+        Controller,
     ],
 )

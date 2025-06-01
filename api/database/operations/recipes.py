@@ -7,9 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import QueryableAttribute, aliased, selectinload
 
 from api import schemas
-from api.database.page_result import PageResult
+from api.database.result import PageResult
 
 from .. import models
+from ..models import RecipeTranslation
 from ..operator import Operator
 
 
@@ -48,20 +49,7 @@ class Recipes:
         offset: int | None = None,
     ) -> PageResult[Result]:
         if language_code is None:
-            translation = aliased(
-                models.RecipeTranslation,
-                select(
-                    models.RecipeTranslation,
-                    func.min(models.RecipeTranslation.created),
-                )
-                .distinct(models.RecipeTranslation.recipe_id)
-                .group_by(
-                    models.RecipeTranslation.recipe_id,
-                    models.RecipeTranslation.language_id,
-                )
-                .subquery("recipe_translation"),
-                flat=True,
-            )
+            translation = self.original_translation_subquery()
             query = (
                 select(translation, models.Recipe)
                 .order_by(desc(cast(ColumnElement, translation.created)))
@@ -139,3 +127,24 @@ class Recipes:
             )
         )
         return await self._operator.delete(query)
+
+    @staticmethod
+    def original_translation_subquery(id: UUID | None = None) -> RecipeTranslation:
+        query = (
+            select(
+                models.RecipeTranslation,
+                func.min(models.RecipeTranslation.created),
+            )
+            .distinct(models.RecipeTranslation.recipe_id)
+            .group_by(
+                models.RecipeTranslation.recipe_id,
+                models.RecipeTranslation.language_id,
+            )
+        )
+        if id is not None:
+            query = query.where(models.RecipeTranslation.recipe_id == id)
+        return aliased(
+            models.RecipeTranslation,
+            query.subquery("recipe_translation"),
+            flat=True,
+        )

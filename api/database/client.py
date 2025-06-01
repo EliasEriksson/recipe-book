@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncSessionTransaction
 
-from .operations import Ingredients, Languages, Recipes, Units
+from .operations import Ingredients, Languages, RecipeIngredients, Recipes, Units
 
 
 class Client:
@@ -16,6 +16,7 @@ class Client:
         self.recipes = Recipes(session)
         self.units = Units(session)
         self.ingredients = Ingredients(session)
+        self.recipe_ingredients = RecipeIngredients(session, self.recipes)
 
     async def refresh(self, *args, **kwargs):
         await self._session.refresh(*args, **kwargs)

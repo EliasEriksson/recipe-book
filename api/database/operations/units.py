@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import QueryableAttribute, aliased, selectinload
 
 from api import schemas
-from api.database.page_result import PageResult
+from api.database.result import PageResult
 
 from .. import models
 from ..operator import Operator

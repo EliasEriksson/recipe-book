@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import *
 from uuid import UUID
 
-from sqlalchemy import ForeignKey, ForeignKeyConstraint, Text
+from sqlalchemy import ForeignKey, ForeignKeyConstraint, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ... import schemas
@@ -17,20 +17,11 @@ if TYPE_CHECKING:
 
 class RecipeIngredientTranslation(Base):
     __tablename__ = "recipe_ingredient_translation"
-    __table_args__ = (
-        ForeignKeyConstraint(
-            ["recipe_id", "ingredient_id"],
-            ["recipe_ingredient.recipe_id", "recipe_ingredient.ingredient_id"],
-            ondelete=CASCADE,
-        ),
-    )
     recipe_id: Mapped[UUID] = mapped_column(
-        ForeignKey("recipe_ingredient.recipe_id"),
         primary_key=True,
         nullable=False,
     )
     ingredient_id: Mapped[UUID] = mapped_column(
-        ForeignKey("recipe_ingredient.ingredient_id"),
         primary_key=True,
         nullable=False,
     )
@@ -53,6 +44,13 @@ class RecipeIngredientTranslation(Base):
     )
     language: Mapped[Language] = relationship(
         back_populates="recipe_ingredient_translations",
+    )
+    __table_args__ = (
+        ForeignKeyConstraint(
+            [recipe_id, ingredient_id],
+            ["recipe_ingredient.recipe_id", "recipe_ingredient.ingredient_id"],
+            ondelete=CASCADE,
+        ),
     )
 
     @classmethod
