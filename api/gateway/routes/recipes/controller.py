@@ -96,7 +96,8 @@ class Controller(litestar.Controller):
             result = await client.recipes.create(data)
         return Response(
             schemas.Recipe.create(result.recipe, result.translation),
-            headers=Header.last_modified(result.modified),
+            headers=Header.last_modified(result.modified)
+            | Header.location(f"/api/recipes/{result.recipe.id}"),
         )
 
     @litestar.put(
